@@ -90,6 +90,26 @@ export const deleteLeaveRequest = async (id: string) => {
 };
 
 /**
+ * ACTION: DOWNLOAD_PDF (BARU)
+ * Meminta server membuat PDF berdasarkan template Doc
+ */
+export const downloadPdf = async (request: LeaveRequest) => {
+  const payload = {
+    action: 'download_pdf',
+    nama: request.name,
+    nip: request.nip,
+    jabatan: request.position,
+    tipe: request.type,
+    alasan: request.reason,
+    mulai: request.startDate,
+    selesai: request.endDate
+  };
+
+  const result = await postToSheet(payload);
+  return result; // Mengembalikan { status: 'success', data: 'base64...', filename: '...' }
+};
+
+/**
  * ACTION: SYNC_USERS
  * Mengirim seluruh data Guru/User ke Spreadsheet (Backup)
  */

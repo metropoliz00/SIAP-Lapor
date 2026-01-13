@@ -97,7 +97,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ users, onLogin, dbError })
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="w-full pl-9 pr-3 py-2 bg-slate-50/50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all text-sm font-medium text-slate-700 placeholder:text-slate-400"
-                placeholder="Username / NIP"
+                placeholder="Username"
                 required
                 disabled={!!dbError}
               />

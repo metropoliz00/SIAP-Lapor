@@ -8,7 +8,8 @@ import {
   Legend
 } from 'recharts';
 import { LeaveRequest, Status, LeaveType, UserRole } from '../types';
-import { CheckCircle, Clock, XCircle, FileText, TrendingUp, Calendar, Search, Check, X, Edit, ArrowRight, UploadCloud, Trash2, ExternalLink } from 'lucide-react';
+import { CheckCircle, Clock, XCircle, FileText, TrendingUp, Calendar, Search, Check, X, Edit, ArrowRight, UploadCloud, Trash2, ExternalLink, Printer, Loader2 } from 'lucide-react';
+import { downloadPdf } from '../services/sheetService';
 
 interface DashboardProps {
   requests: LeaveRequest[];
@@ -24,6 +25,7 @@ const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
 export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onApprove, onReject, onDelete, onSyncUsers }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   // Calculate Stats
   const total = requests.length;
@@ -51,6 +53,28 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
     }
   };
 
+  const handlePrintClick = async (req: LeaveRequest) => {
+    setDownloadingId(req.id);
+    try {
+      const response = await downloadPdf(req);
+      if (response.status === 'success' && response.data) {
+        // Create link and download
+        const link = document.createElement('a');
+        link.href = `data:application/pdf;base64,${response.data}`;
+        link.download = response.filename || `Surat_Ijin_${req.name}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        alert('Gagal membuat PDF. Pastikan Template ID di Apps Script sudah benar.');
+      }
+    } catch (e) {
+      alert('Terjadi kesalahan saat mengunduh PDF.');
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
   const StatCard = ({ icon: Icon, label, value, colorClass, bgClass }: any) => (
     <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center space-x-3 hover:shadow-md transition-shadow">
       <div className={`p-2.5 ${bgClass} ${colorClass} rounded-lg`}>
@@ -65,8 +89,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('id-ID', {
+      weekday: 'long',
       day: 'numeric',
-      month: 'short',
+      month: 'long',
+      year: 'numeric'
     });
   };
 
@@ -110,7 +136,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
 
           <div className="flex items-center gap-2 text-xs text-slate-500 bg-white px-3 py-1.5 rounded-md border border-slate-200 shadow-sm whitespace-nowrap">
             <Calendar size={14} />
-            <span>{new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' })}</span>
+            <span>{new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
           </div>
         </div>
       </header>
@@ -141,7 +167,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
                 <tr className="bg-slate-50 border-b border-slate-200 text-[10px] uppercase tracking-wider text-slate-500 font-bold">
                   <th className="px-4 py-3">Pegawai</th>
                   <th className="px-4 py-3">Detail Ijin</th>
-                  <th className="px-4 py-3 text-center">Status</th>
+                  <th className="px-4 py-3 text-center">Status & Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -224,6 +250,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
                                 'bg-yellow-50 text-yellow-700 border border-yellow-100'}`}>
                               {req.status}
                             </span>
+                          )}
+                          
+                          {/* Tombol Print / Download PDF */}
+                          {req.status === Status.APPROVED && (
+                            <button 
+                              onClick={() => handlePrintClick(req)}
+                              disabled={downloadingId === req.id}
+                              className="flex items-center gap-1 text-[10px] font-medium text-slate-500 hover:text-brand-600 bg-slate-50 px-2 py-1 rounded border border-slate-200 transition-all hover:border-brand-200"
+                              title="Cetak Surat Ijin"
+                            >
+                               {downloadingId === req.id ? (
+                                 <Loader2 size={12} className="animate-spin text-brand-600" />
+                               ) : (
+                                 <Printer size={12} />
+                               )}
+                               <span>{downloadingId === req.id ? 'Memuat...' : 'Cetak'}</span>
+                            </button>
                           )}
 
                           {(onDelete && (userRole === 'KEPALA_SEKOLAH' || req.status === Status.PENDING)) && (
