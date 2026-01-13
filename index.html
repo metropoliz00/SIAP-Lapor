@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SIAP Lapor - Sistem Informasi Sekolah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              brand: {
+                50: '#eff6ff',
+                100: '#dbeafe',
+                200: '#bfdbfe',
+                300: '#93c5fd',
+                400: '#60a5fa',
+                500: '#3b82f6',
+                600: '#2563eb',
+                700: '#1d4ed8',
+                800: '#1e40af',
+                900: '#1e3a8a',
+                950: '#172554',
+              }
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.5s ease-out',
+              'fade-in-up': 'fadeInUp 0.5s ease-out',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              fadeInUp: {
+                '0%': { opacity: '0', transform: 'translateY(10px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              }
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f0f9ff;
+        /* Modern Geometric Network Background */
+        background-image: 
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 1600 800'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23eff6ff' /%3E%3Cstop offset='100%25' stop-color='%23dbeafe' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23g)' /%3E%3Cg stroke='%233b82f6' stroke-width='0.5' stroke-opacity='0.15'%3E%3Cpath d='M0,0 L1600,800 M1600,0 L0,800 M800,0 L800,800 M0,400 L1600,400' /%3E%3Cpath d='M200,0 L1400,800 M1400,0 L200,800' /%3E%3Cpath d='M400,0 L1200,800 M1200,0 L400,800' /%3E%3Cpath d='M0,200 L1600,600 M1600,200 L0,600' /%3E%3Ccircle cx='800' cy='400' r='200' fill='none' stroke-opacity='0.05' /%3E%3Ccircle cx='200' cy='200' r='5' fill='%233b82f6' fill-opacity='0.1' /%3E%3Ccircle cx='1400' cy='600' r='5' fill='%233b82f6' fill-opacity='0.1' /%3E%3Ccircle cx='800' cy='400' r='3' fill='%233b82f6' fill-opacity='0.2' /%3E%3C/g%3E%3C/svg%3E"),
+          radial-gradient(at 0% 0%, hsla(214,95%,93%,1) 0, hsla(214,95%,93%,0) 50%), 
+          radial-gradient(at 100% 100%, hsla(214,95%,90%,1) 0, hsla(214,95%,90%,0) 50%);
+        background-attachment: fixed;
+        background-size: cover;
+        background-position: center;
+        min-height: 100vh;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "recharts": "https://esm.sh/recharts@^3.6.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "@google/genai": "https://esm.sh/@google/genai@^1.35.0"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
