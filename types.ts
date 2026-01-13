@@ -1,11 +1,4 @@
 
-export enum LeaveType {
-  SICK = 'Sakit',
-  PERSONAL = 'Urusan Pribadi',
-  OFFICIAL = 'Tugas Dinas',
-  OTHER = 'Lainnya'
-}
-
 export enum Status {
   PENDING = 'Menunggu',
   APPROVED = 'Disetujui',
@@ -14,13 +7,29 @@ export enum Status {
 
 export type UserRole = 'GURU' | 'KEPALA_SEKOLAH';
 
+// Helper constants for UI selections
+export const LeaveCategories = {
+  DISPENSASI_DINAS: 'Dispensasi Dinas',
+  DISPENSASI_PRIBADI: 'Dispensasi Pribadi',
+  CUTI: 'Cuti'
+};
+
+export const CutiTypes = {
+  TAHUNAN: 'Cuti Tahunan',
+  MELAHIRKAN: 'Cuti Melahirkan',
+  HAJI: 'Cuti Haji',
+  SAKIT: 'Cuti Sakit',
+  LAINNYA: 'Lainnya / Input Sendiri'
+};
+
 export interface User {
   name: string;
   nip: string;
   position: string;
+  rank?: string; // Kolom E (Spreadsheet) - Pangkat/Golongan
   role: UserRole;
-  username?: string; // Kolom D (Spreadsheet)
-  password?: string; // Kolom E (Spreadsheet)
+  username?: string; 
+  password?: string; 
 }
 
 export interface LeaveRequest {
@@ -28,12 +37,13 @@ export interface LeaveRequest {
   name: string;
   nip: string;
   position: string;
+  rank?: string; // Pangkat saat mengajukan
   department: string;
   startDate: string;
   endDate: string;
   startTime: string;
   endTime: string;
-  type: LeaveType;
+  type: string; 
   reason: string;
   status: Status;
   createdAt: string;

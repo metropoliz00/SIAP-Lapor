@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ViewState, LeaveRequest, LeaveType, Status, User } from './types';
+import { ViewState, LeaveRequest, Status, User } from './types';
 import { Dashboard } from './components/Dashboard';
 import { LeaveForm } from './components/LeaveForm';
 import { LoginForm } from './components/LoginForm';

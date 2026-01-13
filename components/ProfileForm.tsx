@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../types';
-import { Save, User as UserIcon, Briefcase, Shield, Key } from 'lucide-react';
+import { Save, User as UserIcon, Briefcase, Shield, Key, Award } from 'lucide-react';
 
 interface ProfileFormProps {
   user: User;
@@ -11,15 +11,17 @@ interface ProfileFormProps {
 export const ProfileForm: React.FC<ProfileFormProps> = ({ user, onSave, onCancel }) => {
   const [name, setName] = useState(user.name);
   const [position, setPosition] = useState(user.position);
+  const [rank, setRank] = useState(user.rank || '');
 
   useEffect(() => {
     setName(user.name);
     setPosition(user.position);
+    setRank(user.rank || '');
   }, [user]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({ ...user, name, position });
+    onSave({ ...user, name, position, rank });
   };
 
   return (
@@ -64,6 +66,20 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ user, onSave, onCancel
                       onChange={(e) => setPosition(e.target.value)}
                       className="w-full pl-8 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-500 text-sm"
                       required
+                    />
+                  </div>
+               </div>
+
+               <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Pangkat / Golongan</label>
+                  <div className="relative">
+                     <Award size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                     <input
+                      type="text"
+                      value={rank}
+                      onChange={(e) => setRank(e.target.value)}
+                      placeholder="Contoh: Penata Muda / III a"
+                      className="w-full pl-8 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-500 text-sm"
                     />
                   </div>
                </div>

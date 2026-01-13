@@ -1,21 +1,70 @@
-import { LeaveRequest, User } from '../types';
+import { LeaveRequest, User, Status } from '../types';
 
 // =========================================================================================
-// PERHATIAN: JIKA APLIKASI TIDAK KONEK, GANTI URL DI BAWAH INI DENGAN URL DEPLOYMENT BARU
-// CARA:
-// 1. Buka Apps Script > Deploy > New Deployment > Select Type: Web App
-// 2. Execute as: Me, Who has access: Anyone
-// 3. Klik Deploy > Copy URL yang berakhiran '/exec'
-// 4. Paste di bawah ini:
+// KONFIGURASI KONEKSI SPREADSHEET
 // =========================================================================================
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx8d4G8WwGlgJv9opdXhiJGQ7VB4mV08auRw2q97YRDMsNvTj08fI6bqr0YfJxbRwyM4w/exec'; 
+// 1. Deploy Apps Script (lihat APPS_SCRIPT_GUIDE.md)
+// 2. Copy 'Web App URL' dan paste di bawah ini:
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzK1yd4IqxAv2_5cJRZc42akFDVJ_PsMtjn7QwRoE74nw9uFYl5lynBSLpu7_J4BIgchg/exec'; 
+
+// 3. (Opsional) Copy Link Spreadsheet Anda untuk tombol "Database" di Dashboard
+export const SPREADSHEET_URL_VIEW = ''; 
+
+// =========================================================================================
+// DATA MOCK / DUMMY (Akan muncul jika URL di atas kosong atau koneksi gagal)
+// =========================================================================================
+const MOCK_USERS: User[] = [
+  { name: 'Administrator', nip: 'admin', position: 'Operator', role: 'KEPALA_SEKOLAH', rank: '-', username: 'admin', password: '123' },
+  { name: 'Budi Santoso', nip: '198001012005011001', position: 'Guru Kelas 6', role: 'GURU', rank: 'Pembina / IVa', username: 'budi', password: '123' },
+  { name: 'Siti Aminah', nip: '198505052010012005', position: 'Guru Kelas 1', role: 'GURU', rank: 'Penata / IIIc', username: 'siti', password: '123' }
+];
+
+const MOCK_REQUESTS: LeaveRequest[] = [
+  {
+    id: 'mock-1',
+    name: 'Siti Aminah',
+    nip: '198505052010012005',
+    position: 'Guru Kelas 1',
+    rank: 'Penata / IIIc',
+    department: 'UPT SD Negeri Remen 2',
+    type: 'Cuti Tahunan',
+    reason: 'Kepentingan Keluarga',
+    startDate: new Date().toISOString(),
+    endDate: new Date().toISOString(),
+    startTime: '07:00',
+    endTime: '14:00',
+    status: Status.APPROVED,
+    createdAt: new Date(Date.now() - 86400000).toISOString()
+  },
+  {
+     id: 'mock-2',
+    name: 'Budi Santoso',
+    nip: '198001012005011001',
+    position: 'Guru Kelas 6',
+    rank: 'Pembina / IVa',
+    department: 'UPT SD Negeri Remen 2',
+    type: 'Dispensasi Dinas',
+    reason: 'Rapat KKG',
+    startDate: new Date().toISOString(),
+    endDate: new Date().toISOString(),
+    startTime: '08:00',
+    endTime: '12:00',
+    status: Status.PENDING,
+    createdAt: new Date().toISOString()
+  }
+];
 
 /**
  * Helper function utama untuk request ke Google Apps Script.
- * Menggunakan method: 'POST' untuk memicu trigger doPost(e) di sisi server.
- * Header 'Content-Type': 'text/plain' digunakan untuk mencegah CORS preflight request.
  */
 const postToSheet = async (payload: any) => {
+  // Jika URL belum diisi, langsung gunakan Mock Data
+  if (!GOOGLE_SCRIPT_URL) {
+    console.log(`[Demo Mode] URL belum diset. Menggunakan data dummy untuk aksi: ${payload.action}`);
+    await new Promise(resolve => setTimeout(resolve, 500)); // Simulasi loading
+    return getMockResponse(payload);
+  }
+
   try {
     const response = await fetch(GOOGLE_SCRIPT_URL, {
       method: 'POST', 
@@ -26,18 +75,37 @@ const postToSheet = async (payload: any) => {
       body: JSON.stringify(payload)
     });
 
+    if (!response.ok) {
+        throw new Error(`HTTP Error: ${response.status}`);
+    }
+
     const result = await response.json();
     return result;
   } catch (error) {
-    console.error(`Error pada action ${payload.action}:`, error);
-    // Mengembalikan object dengan status error agar UI bisa menangani
-    return { status: 'error', message: String(error) };
+    console.warn(`[Connection Failed] Gagal koneksi ke server (${payload.action}). Menggunakan data lokal.`);
+    // Fallback ke Mock Data jika fetch gagal (misal offline)
+    await new Promise(resolve => setTimeout(resolve, 800));
+    return getMockResponse(payload);
   }
+};
+
+// Helper untuk mengembalikan Mock Data berdasarkan action
+const getMockResponse = (payload: any) => {
+    if (payload.action === 'get_users') {
+        return { status: 'success', data: MOCK_USERS };
+    }
+    if (payload.action === 'get_requests') {
+        return { status: 'success', data: MOCK_REQUESTS };
+    }
+    if (payload.action === 'download_pdf') {
+       return { status: 'error', message: 'Fitur PDF butuh koneksi server' };
+    }
+    return { status: 'success', message: 'Demo mode: Action simulated successfully' };
 };
 
 /**
  * ACTION: CREATE
- * Mengirim data ijin baru ke Spreadsheet
+ * Mengirim data ijin baru ke Spreadsheet (Sheet: Data_Ijin).
  */
 export const syncToSpreadsheet = async (request: LeaveRequest) => {
   const payload = {
@@ -46,13 +114,17 @@ export const syncToSpreadsheet = async (request: LeaveRequest) => {
     nama: request.name,
     nip: request.nip,
     jabatan: request.position,
+    pangkat: request.rank,
+    unit: request.department,
     tipe: request.type,
     alasan: request.reason,
     mulai: request.startDate,
     jamMulai: request.startTime,
     selesai: request.endDate,
     jamSelesai: request.endTime,
-    status: request.status
+    status: request.status,
+    tanggalPengajuan: request.createdAt,
+    
   };
 
   const result = await postToSheet(payload);
@@ -75,13 +147,12 @@ export const updateSheetStatus = async (id: string, status: string) => {
 };
 
 /**
- * ACTION: DELETE (BARU)
+ * ACTION: DELETE
  * Menghapus data ijin dari Spreadsheet
- * Catatan: Pastikan Anda menambahkan logika 'delete' di Apps Script Anda jika ingin fitur ini bekerja permanen di database.
  */
 export const deleteLeaveRequest = async (id: string) => {
   const payload = {
-    action: 'delete', // Pastikan Apps Script menangani action ini jika belum
+    action: 'delete', 
     id: id
   };
 
@@ -90,7 +161,7 @@ export const deleteLeaveRequest = async (id: string) => {
 };
 
 /**
- * ACTION: DOWNLOAD_PDF (BARU)
+ * ACTION: DOWNLOAD_PDF
  * Meminta server membuat PDF berdasarkan template Doc
  */
 export const downloadPdf = async (request: LeaveRequest) => {
@@ -99,19 +170,24 @@ export const downloadPdf = async (request: LeaveRequest) => {
     nama: request.name,
     nip: request.nip,
     jabatan: request.position,
+    pangkat: request.rank, // Include Pangkat for PDF
+    unit: request.department,
     tipe: request.type,
     alasan: request.reason,
     mulai: request.startDate,
-    selesai: request.endDate
+    selesai: request.endDate,
+    jamMulai: request.startTime,
+    jamSelesai: request.endTime
   };
 
   const result = await postToSheet(payload);
-  return result; // Mengembalikan { status: 'success', data: 'base64...', filename: '...' }
+  return result; 
 };
 
 /**
  * ACTION: SYNC_USERS
- * Mengirim seluruh data Guru/User ke Spreadsheet (Backup)
+ * Mengirim seluruh data Guru/User ke Spreadsheet.
+ * Backend akan memecah data ini ke Sheet 'Data_Pegawai' dan 'Login'.
  */
 export const syncUsersToSpreadsheet = async (users: User[]) => {
   const payload = {
@@ -124,8 +200,8 @@ export const syncUsersToSpreadsheet = async (users: User[]) => {
 };
 
 /**
- * ACTION: GET_USERS (READ via POST)
- * Mengambil Data Users dari Spreadsheet
+ * ACTION: GET_USERS
+ * Mengambil Data Users yang sudah digabung dari Sheet 'Data_Pegawai' dan 'Login'.
  */
 export const getUsersFromSheet = async (): Promise<User[]> => {
   const result = await postToSheet({ action: 'get_users' });
@@ -137,8 +213,8 @@ export const getUsersFromSheet = async (): Promise<User[]> => {
 };
 
 /**
- * ACTION: GET_REQUESTS (READ via POST)
- * Mengambil Data Ijin dari Spreadsheet
+ * ACTION: GET_REQUESTS
+ * Mengambil Data Ijin dari Sheet 'Data_Ijin'.
  */
 export const getRequestsFromSheet = async (): Promise<LeaveRequest[]> => {
   const result = await postToSheet({ action: 'get_requests' });

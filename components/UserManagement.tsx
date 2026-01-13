@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { User, UserRole } from '../types';
-import { Edit, Save, X, Search, User as UserIcon, Shield, Briefcase, Plus, UploadCloud, Key, Check } from 'lucide-react';
+import { Edit, Save, X, Search, User as UserIcon, Shield, Briefcase, Plus, UploadCloud, Key, Check, Award } from 'lucide-react';
 
 interface UserManagementProps {
   users: User[];
@@ -28,7 +28,8 @@ export const UserManagement: React.FC<UserManagementProps> = ({ users, onUpdateU
     setFormData({ 
       ...user,
       username: user.username || user.nip,
-      password: user.password || user.nip
+      password: user.password || user.nip,
+      rank: user.rank || ''
     });
   };
 
@@ -37,6 +38,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ users, onUpdateU
       name: '',
       nip: '',
       position: 'Guru Kelas',
+      rank: '',
       role: 'GURU',
       username: '',
       password: ''
@@ -66,7 +68,8 @@ export const UserManagement: React.FC<UserManagementProps> = ({ users, onUpdateU
     setInlineEditingNip(user.nip);
     setInlineFormData({ 
       ...user, 
-      username: user.username || user.nip 
+      username: user.username || user.nip,
+      rank: user.rank || ''
     });
   };
 
@@ -145,11 +148,11 @@ export const UserManagement: React.FC<UserManagementProps> = ({ users, onUpdateU
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 text-[10px] uppercase tracking-wider text-slate-500 font-bold">
-                <th className="px-4 py-3">Nama Pegawai</th>
-                <th className="px-4 py-3">NIP</th>
-                <th className="px-4 py-3">Username</th>
-                <th className="px-4 py-3">Jabatan</th>
-                <th className="px-4 py-3">Role</th>
+                <th className="px-4 py-3">Nama Pegawai (A)</th>
+                <th className="px-4 py-3">NIP (B)</th>
+                <th className="px-4 py-3">Jabatan (C)</th>
+                <th className="px-4 py-3">Role (D)</th>
+                <th className="px-4 py-3">Pangkat (G)</th>
                 <th className="px-4 py-3 text-center">Aksi</th>
               </tr>
             </thead>
@@ -163,35 +166,28 @@ export const UserManagement: React.FC<UserManagementProps> = ({ users, onUpdateU
                   const isEditing = inlineEditingNip === user.nip;
                   return (
                     <tr key={user.nip} className={`transition-colors text-xs ${isEditing ? 'bg-brand-50/30' : 'hover:bg-slate-50/50'}`}>
-                      {/* Nama */}
+                      {/* Nama (A) */}
                       <td className="px-4 py-2.5 align-middle">
                         {isEditing && inlineFormData ? (
                           <input type="text" value={inlineFormData.name} onChange={(e) => handleInlineChange('name', e.target.value)}
                             className="w-full px-2 py-1 border border-brand-300 rounded focus:ring-1 focus:ring-brand-500 text-xs" />
                         ) : (<span className="font-semibold text-slate-700">{user.name}</span>)}
                       </td>
-                      {/* NIP */}
+                      {/* NIP (B) */}
                       <td className="px-4 py-2.5 align-middle">
                         {isEditing && inlineFormData ? (
                           <input type="text" value={inlineFormData.nip} onChange={(e) => handleInlineChange('nip', e.target.value)}
                             className="w-full px-2 py-1 border border-brand-300 rounded focus:ring-1 focus:ring-brand-500 font-mono text-xs" />
                         ) : (<span className="font-mono text-slate-500">{user.nip}</span>)}
                       </td>
-                      {/* Username */}
-                      <td className="px-4 py-2.5 align-middle">
-                         {isEditing && inlineFormData ? (
-                          <input type="text" value={inlineFormData.username || ''} onChange={(e) => handleInlineChange('username', e.target.value)}
-                             className="w-full px-2 py-1 border border-brand-300 rounded text-xs font-mono" placeholder={inlineFormData.nip} />
-                         ) : ( <span className="font-mono text-[10px] text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded">{user.username || user.nip}</span> )}
-                      </td>
-                      {/* Jabatan */}
+                      {/* Jabatan (C) */}
                       <td className="px-4 py-2.5 align-middle">
                          {isEditing && inlineFormData ? (
                           <input type="text" value={inlineFormData.position} onChange={(e) => handleInlineChange('position', e.target.value)}
                              className="w-full px-2 py-1 border border-brand-300 rounded text-xs" />
                          ) : ( <span className="text-slate-600">{user.position}</span> )}
                       </td>
-                      {/* Role */}
+                      {/* Role (D) */}
                       <td className="px-4 py-2.5 align-middle">
                         {isEditing && inlineFormData ? (
                           <select value={inlineFormData.role} onChange={(e) => handleInlineChange('role', e.target.value as UserRole)}
@@ -205,6 +201,13 @@ export const UserManagement: React.FC<UserManagementProps> = ({ users, onUpdateU
                             {user.role === 'KEPALA_SEKOLAH' ? 'KS' : 'Guru'}
                           </span>
                         )}
+                      </td>
+                      {/* Pangkat (E) */}
+                      <td className="px-4 py-2.5 align-middle">
+                         {isEditing && inlineFormData ? (
+                          <input type="text" value={inlineFormData.rank || ''} onChange={(e) => handleInlineChange('rank', e.target.value)}
+                             className="w-full px-2 py-1 border border-brand-300 rounded text-xs" placeholder="-" />
+                         ) : ( <span className="text-slate-600">{user.rank || '-'}</span> )}
                       </td>
                       {/* Aksi */}
                       <td className="px-4 py-2.5 align-middle text-center">
@@ -268,6 +271,12 @@ export const UserManagement: React.FC<UserManagementProps> = ({ users, onUpdateU
                     <label className="block text-xs font-bold text-slate-600 mb-1">Jabatan</label>
                     <input type="text" value={formData.position} onChange={(e) => setFormData({...formData, position: e.target.value})}
                       className="w-full px-3 py-2 border border-slate-300 rounded focus:ring-1 focus:ring-brand-500 text-sm" required />
+                  </div>
+                   <div>
+                    <label className="block text-xs font-bold text-slate-600 mb-1">Pangkat / Golongan</label>
+                    <input type="text" value={formData.rank || ''} onChange={(e) => setFormData({...formData, rank: e.target.value})}
+                      placeholder="Contoh: Penata Muda / III a"
+                      className="w-full px-3 py-2 border border-slate-300 rounded focus:ring-1 focus:ring-brand-500 text-sm" />
                   </div>
                 </>
               )}

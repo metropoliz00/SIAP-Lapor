@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   PieChart, 
   Pie, 
@@ -7,9 +7,9 @@ import {
   ResponsiveContainer, 
   Legend
 } from 'recharts';
-import { LeaveRequest, Status, LeaveType, UserRole } from '../types';
-import { CheckCircle, Clock, XCircle, FileText, TrendingUp, Calendar, Search, Check, X, Edit, ArrowRight, UploadCloud, Trash2, ExternalLink, Printer, Loader2 } from 'lucide-react';
-import { downloadPdf } from '../services/sheetService';
+import { LeaveRequest, Status, UserRole } from '../types';
+import { CheckCircle, Clock, XCircle, FileText, TrendingUp, Calendar, Search, Check, X, Edit, UploadCloud, Trash2, ExternalLink, Printer, Loader2 } from 'lucide-react';
+import { downloadPdf, SPREADSHEET_URL_VIEW } from '../services/sheetService';
 
 interface DashboardProps {
   requests: LeaveRequest[];
@@ -20,7 +20,17 @@ interface DashboardProps {
   onSyncUsers?: () => Promise<void>;
 }
 
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
+// Generate colors dynamically
+const COLORS = [
+  '#3b82f6', // brand-500 (Blue)
+  '#10b981', // green-500
+  '#f59e0b', // amber-500
+  '#ef4444', // red-500
+  '#8b5cf6', // violet-500
+  '#ec4899', // pink-500
+  '#06b6d4', // cyan-500
+  '#84cc16'  // lime-500
+];
 
 export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onApprove, onReject, onDelete, onSyncUsers }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -33,11 +43,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
   const pending = requests.filter(r => r.status === Status.PENDING).length;
   const rejected = requests.filter(r => r.status === Status.REJECTED).length;
 
-  // Prepare Data for Charts
-  const typeData = Object.values(LeaveType).map(type => ({
-    name: type,
-    value: requests.filter(r => r.type === type).length
-  })).filter(d => d.value > 0);
+  // Prepare Data for Charts Dynamically based on existing data
+  const typeData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    requests.forEach(req => {
+      // Normalize type name just in case
+      const typeName = req.type || 'Lainnya';
+      counts[typeName] = (counts[typeName] || 0) + 1;
+    });
+
+    return Object.keys(counts).map((key) => ({
+      name: key,
+      value: counts[key]
+    })).sort((a, b) => b.value - a.value); // Sort desc
+  }, [requests]);
 
   const handleSyncClick = async () => {
     if (onSyncUsers) {
@@ -111,9 +130,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
         </div>
         
         <div className="flex flex-col sm:flex-row gap-2">
-          {userRole === 'KEPALA_SEKOLAH' && (
+          {userRole === 'KEPALA_SEKOLAH' && SPREADSHEET_URL_VIEW && (
             <a 
-              href="https://docs.google.com/spreadsheets/d/e/2PACX-1vQgMY6PTA6QgUwmmp60V3juaKuC3983DAR1kPiXB-uJ_3gJ0Q94w2S79ZRKGOSh9nc6GCy06gPS9TUY/pubhtml"
+              href={SPREADSHEET_URL_VIEW}
               target="_blank"
               rel="noreferrer"
               className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition shadow-sm font-medium text-xs"
@@ -184,7 +203,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
                         <div className="flex flex-col">
                           <span className="font-bold text-xs text-slate-700 truncate">{req.name}</span>
                           <span className="text-[10px] text-slate-400 font-mono">{req.nip}</span>
-                          <span className="text-[10px] text-brand-600 mt-0.5">{req.position}</span>
+                           <div className="flex items-center gap-1 mt-0.5">
+                             <span className="text-[10px] text-slate-500 bg-slate-100 px-1 rounded border border-slate-200">{req.rank || '-'}</span>
+                          </div>
+                          <span className="text-[10px] text-brand-600">{req.position}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3 align-top">
