@@ -6,9 +6,10 @@ interface LeaveFormProps {
   currentUser: User;
   onSubmit: (request: LeaveRequest) => void;
   onCancel: () => void;
+  initialData?: LeaveRequest | null;
 }
 
-export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onCancel }) => {
+export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onCancel, initialData }) => {
   const [name] = useState(currentUser.name);
   const [nip] = useState(currentUser.nip);
   const [position] = useState(currentUser.position);
@@ -25,13 +26,46 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
   const [endDate, setEndDate] = useState('');
   const [endTime, setEndTime] = useState('14:00');
   const [reason, setReason] = useState('');
+  const [existingId, setExistingId] = useState<string | null>(null);
+  const [existingCreatedAt, setExistingCreatedAt] = useState<string | null>(null);
 
-  // Auto-set endDate to startDate when startDate changes if endDate is empty
+  // Load initial data for editing
   useEffect(() => {
-    if (startDate && !endDate) {
+    if (initialData) {
+      setExistingId(initialData.id);
+      setExistingCreatedAt(initialData.createdAt);
+      setStartDate(initialData.startDate.split('T')[0]); // Ensure date format
+      setEndDate(initialData.endDate.split('T')[0]);
+      setStartTime(initialData.startTime);
+      setEndTime(initialData.endTime);
+      setReason(initialData.reason);
+
+      // Parse Type
+      const type = initialData.type;
+      const categories = Object.values(LeaveCategories);
+      
+      if (type.startsWith("Cuti:")) {
+        setMainCategory(LeaveCategories.CUTI);
+        setSelectedCutiType(CutiTypes.LAINNYA);
+        setCustomCutiInput(type.replace("Cuti: ", ""));
+      } else if (Object.values(CutiTypes).includes(type)) {
+        setMainCategory(LeaveCategories.CUTI);
+        setSelectedCutiType(type);
+      } else if (categories.includes(type)) {
+        setMainCategory(type);
+      } else {
+         // Fallback default
+         setMainCategory(LeaveCategories.DISPENSASI_DINAS);
+      }
+    }
+  }, [initialData]);
+
+  // Auto-set endDate to startDate when startDate changes if endDate is empty or new
+  useEffect(() => {
+    if (startDate && (!endDate || !initialData)) {
       setEndDate(startDate);
     }
-  }, [startDate]);
+  }, [startDate, endDate, initialData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +86,7 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
     }
 
     const newRequest: LeaveRequest = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: existingId || Math.random().toString(36).substr(2, 9),
       name,
       nip,
       position,
@@ -64,8 +98,8 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
       startTime,
       endTime,
       reason,
-      status: Status.PENDING,
-      createdAt: new Date().toISOString()
+      status: Status.PENDING, // Reset status to PENDING on edit
+      createdAt: existingCreatedAt || new Date().toISOString()
     };
 
     onSubmit(newRequest);
@@ -74,7 +108,7 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
   return (
     <div className="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-sm border border-slate-200 animate-fade-in">
       <header className="mb-4 border-b border-slate-100 pb-3">
-        <h2 className="text-xl font-bold text-slate-800">Form Pengajuan</h2>
+        <h2 className="text-xl font-bold text-slate-800">{initialData ? 'Edit Pengajuan' : 'Form Pengajuan'}</h2>
         <p className="text-xs text-slate-500">Lengkapi data untuk mengajukan ijin.</p>
       </header>
 
@@ -109,10 +143,10 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
                 <label className="block text-xs font-bold text-slate-700">Kategori Ijin</label>
                 
                 {/* Main Category Selection (Radio Style Cards) */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {Object.values(LeaveCategories).map((cat) => (
                     <label key={cat} 
-                      className={`cursor-pointer border rounded-lg p-2 flex items-center justify-center text-xs font-medium transition-all
+                      className={`cursor-pointer border rounded-lg p-2 flex items-center justify-center text-xs font-medium transition-all text-center h-full
                       ${mainCategory === cat 
                         ? 'bg-brand-600 text-white border-brand-600 shadow-sm' 
                         : 'bg-white text-slate-600 border-slate-200 hover:border-brand-300'}`}
@@ -243,7 +277,7 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
             className="px-4 py-2 bg-brand-600 text-white text-xs font-bold rounded-lg hover:bg-brand-700 transition flex items-center gap-2"
           >
             <Send size={14} />
-            Kirim Pengajuan
+            {initialData ? 'Update Pengajuan' : 'Kirim Pengajuan'}
           </button>
         </div>
       </form>

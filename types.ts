@@ -11,6 +11,7 @@ export type UserRole = 'GURU' | 'KEPALA_SEKOLAH';
 export const LeaveCategories = {
   DISPENSASI_DINAS: 'Dispensasi Dinas',
   DISPENSASI_PRIBADI: 'Dispensasi Pribadi',
+  IJIN: 'Ijin',
   CUTI: 'Cuti'
 };
 
@@ -26,7 +27,7 @@ export interface User {
   name: string;
   nip: string;
   position: string;
-  rank?: string; // Kolom E (Spreadsheet) - Pangkat/Golongan
+  rank?: string; // Kolom D (Spreadsheet) - Pangkat/Golongan
   role: UserRole;
   username?: string; 
   password?: string; 

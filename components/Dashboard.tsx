@@ -8,8 +8,8 @@ import {
   Legend
 } from 'recharts';
 import { LeaveRequest, Status, UserRole } from '../types';
-import { CheckCircle, Clock, XCircle, FileText, TrendingUp, Calendar, Search, Check, X, Edit, UploadCloud, Trash2, ExternalLink, Printer, Loader2 } from 'lucide-react';
-import { downloadPdf, SPREADSHEET_URL_VIEW } from '../services/sheetService';
+import { CheckCircle, Clock, XCircle, FileText, TrendingUp, Calendar, Search, Check, X, Edit, UploadCloud, Trash2, ExternalLink, FileDown, Loader2 } from 'lucide-react';
+import { downloadDoc, SPREADSHEET_URL_VIEW } from '../services/sheetService';
 
 interface DashboardProps {
   requests: LeaveRequest[];
@@ -17,23 +17,20 @@ interface DashboardProps {
   onApprove: (id: string) => void;
   onReject: (id: string) => void;
   onDelete?: (id: string) => void; 
+  onEdit?: (request: LeaveRequest) => void;
   onSyncUsers?: () => Promise<void>;
 }
 
 // Generate colors dynamically
 const COLORS = [
-  '#3b82f6', // brand-500 (Blue)
+  '#3b82f6', // brand-500
   '#10b981', // green-500
   '#f59e0b', // amber-500
   '#ef4444', // red-500
   '#8b5cf6', // violet-500
-  '#ec4899', // pink-500
-  '#06b6d4', // cyan-500
-  '#84cc16'  // lime-500
 ];
 
-export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onApprove, onReject, onDelete, onSyncUsers }) => {
-  const [editingId, setEditingId] = useState<string | null>(null);
+export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onApprove, onReject, onDelete, onEdit, onSyncUsers }) => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
@@ -43,11 +40,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
   const pending = requests.filter(r => r.status === Status.PENDING).length;
   const rejected = requests.filter(r => r.status === Status.REJECTED).length;
 
-  // Prepare Data for Charts Dynamically based on existing data
+  // Prepare Data for Charts
   const typeData = useMemo(() => {
     const counts: Record<string, number> = {};
     requests.forEach(req => {
-      // Normalize type name just in case
       const typeName = req.type || 'Lainnya';
       counts[typeName] = (counts[typeName] || 0) + 1;
     });
@@ -55,7 +51,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
     return Object.keys(counts).map((key) => ({
       name: key,
       value: counts[key]
-    })).sort((a, b) => b.value - a.value); // Sort desc
+    })).sort((a, b) => b.value - a.value);
   }, [requests]);
 
   const handleSyncClick = async () => {
@@ -72,23 +68,73 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
     }
   };
 
-  const handlePrintClick = async (req: LeaveRequest) => {
+  const handleDownloadClick = async (req: LeaveRequest) => {
     setDownloadingId(req.id);
     try {
-      const response = await downloadPdf(req);
+      const response = await downloadDoc(req);
+      
       if (response.status === 'success' && response.data) {
-        // Create link and download
-        const link = document.createElement('a');
-        link.href = `data:application/pdf;base64,${response.data}`;
-        link.download = response.filename || `Surat_Ijin_${req.name}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // KONVERSI BASE64 KE BLOB (DOCX)
+        try {
+          // 1. Bersihkan string base64 dari spasi/newline
+          const cleanBase64 = response.data.replace(/[\r\n]+/g, '');
+          
+          // 2. Decode Base64
+          const byteCharacters = atob(cleanBase64);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          
+          // 3. Buat Blob DOCX
+          // MIME Type untuk .docx
+          const blob = new Blob([byteArray], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+          
+          // 4. Buat URL Object
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          // Gunakan ekstensi .docx
+          link.download = response.filename || `Surat_Ijin_${req.name}.docx`;
+          
+          document.body.appendChild(link);
+          link.click();
+          
+          // 5. Cleanup
+          setTimeout(() => {
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+          }, 100);
+
+        } catch (convertError) {
+          console.error("Error converting DOCX:", convertError);
+          alert("Gagal memproses file dokumen dari server.");
+        }
       } else {
-        alert('Gagal membuat PDF. Pastikan Template ID di Apps Script sudah benar.');
+        console.error("Server Error Response:", response);
+        
+        let errorMsg = response.message || response.error || "Terjadi kesalahan tidak diketahui.";
+        
+        // Handle jika pesan error berupa Object
+        if (typeof errorMsg === 'object') {
+            try {
+                errorMsg = JSON.stringify(errorMsg);
+            } catch(e) {
+                errorMsg = "Detail error tidak dapat dibaca (Object).";
+            }
+        }
+        
+        // Handle jika pesan error adalah string "[object Object]"
+        if (String(errorMsg) === '[object Object]') {
+             errorMsg = "Terjadi kesalahan internal pada script server (Invalid Error Format). Periksa Apps Script.";
+        }
+
+        alert(`Gagal mengunduh dokumen:\n${errorMsg}\n\nPastikan ID Template Google Doc benar.`);
       }
     } catch (e) {
-      alert('Terjadi kesalahan saat mengunduh PDF.');
+      console.error("Network Error:", e);
+      alert('Terjadi kesalahan jaringan saat mengunduh dokumen.');
     } finally {
       setDownloadingId(null);
     }
@@ -228,74 +274,81 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
                         </div>
                       </td>
                       <td className="px-4 py-3 align-top text-center w-[20%]">
-                        <div className="flex flex-col items-center gap-1.5">
-                          {userRole === 'KEPALA_SEKOLAH' ? (
-                            req.status === Status.PENDING || editingId === req.id ? (
+                        <div className="flex flex-col items-center gap-2 w-full">
+                          
+                          {/* LOGIC STATUS & ACTION */}
+                          
+                          {req.status === Status.PENDING ? (
+                            /* JIKA STATUS MENUNGGU (PENDING) */
+                            userRole === 'KEPALA_SEKOLAH' ? (
+                              /* Tampilan untuk Kepala Sekolah (Actionable) */
                               <div className="flex items-center justify-center gap-1">
                                 <button 
-                                  onClick={() => { onApprove(req.id); setEditingId(null); }}
-                                  className="p-1 bg-green-100 text-green-700 rounded hover:bg-green-200 transition"
+                                  onClick={() => onApprove(req.id)}
+                                  className="p-1.5 bg-green-100 text-green-700 rounded hover:bg-green-200 transition"
                                   title="Setujui"
                                 >
                                   <Check size={14} />
                                 </button>
                                 <button 
-                                  onClick={() => { onReject(req.id); setEditingId(null); }}
-                                  className="p-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition"
+                                  onClick={() => onReject(req.id)}
+                                  className="p-1.5 bg-red-100 text-red-700 rounded hover:bg-red-200 transition"
                                   title="Tolak"
                                 >
                                   <X size={14} />
                                 </button>
-                                {req.status !== Status.PENDING && (
-                                  <button onClick={() => setEditingId(null)} className="p-1 text-slate-400 hover:bg-slate-100 rounded">
-                                    <XCircle size={14} />
+                              </div>
+                            ) : (
+                              /* Tampilan untuk Guru (Status + Edit) */
+                              <div className="flex items-center gap-1">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-yellow-50 text-yellow-700 border border-yellow-100">
+                                  Menunggu
+                                </span>
+                                {/* Tombol Edit Aktif */}
+                                {onEdit && (
+                                  <button 
+                                    onClick={() => onEdit(req)} 
+                                    className="text-slate-400 hover:text-brand-600 transition-colors"
+                                    title="Edit Pengajuan"
+                                  >
+                                    <Edit size={12} />
                                   </button>
                                 )}
                               </div>
-                            ) : (
-                              <div className="flex items-center gap-1">
-                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold
-                                  ${req.status === Status.APPROVED ? 'bg-green-50 text-green-700 border border-green-100' : 
-                                    req.status === Status.REJECTED ? 'bg-red-50 text-red-700 border border-red-100' : 
-                                    'bg-yellow-50 text-yellow-700 border border-yellow-100'}`}>
-                                  {req.status}
-                                </span>
-                                <button onClick={() => setEditingId(req.id)} className="text-slate-400 hover:text-brand-600">
-                                  <Edit size={12} />
-                                </button>
-                              </div>
                             )
                           ) : (
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold
-                              ${req.status === Status.APPROVED ? 'bg-green-50 text-green-700 border border-green-100' : 
-                                req.status === Status.REJECTED ? 'bg-red-50 text-red-700 border border-red-100' : 
-                                'bg-yellow-50 text-yellow-700 border border-yellow-100'}`}>
-                              {req.status}
-                            </span>
-                          )}
-                          
-                          {/* Tombol Print / Download PDF */}
-                          {req.status === Status.APPROVED && (
-                            <button 
-                              onClick={() => handlePrintClick(req)}
-                              disabled={downloadingId === req.id}
-                              className="flex items-center gap-1 text-[10px] font-medium text-slate-500 hover:text-brand-600 bg-slate-50 px-2 py-1 rounded border border-slate-200 transition-all hover:border-brand-200"
-                              title="Cetak Surat Ijin"
-                            >
-                               {downloadingId === req.id ? (
-                                 <Loader2 size={12} className="animate-spin text-brand-600" />
-                               ) : (
-                                 <Printer size={12} />
-                               )}
-                               <span>{downloadingId === req.id ? 'Memuat...' : 'Cetak'}</span>
-                            </button>
+                            /* JIKA STATUS FINAL (APPROVED / REJECTED) */
+                            <div className="w-full flex flex-col gap-2">
+                              <span className={`inline-flex items-center justify-center w-full px-2 py-0.5 rounded text-[10px] font-bold border
+                                ${req.status === Status.APPROVED ? 'bg-green-50 text-green-700 border-green-100' : 'bg-red-50 text-red-700 border-red-100'}`}>
+                                {req.status}
+                              </span>
+                              
+                              {/* LOGIC UTAMA: JIKA DISETUJUI, MUNCUL MENU CETAK */}
+                              {req.status === Status.APPROVED && (
+                                <button 
+                                  onClick={() => handleDownloadClick(req)}
+                                  disabled={downloadingId === req.id}
+                                  className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white text-[10px] font-bold rounded shadow-sm hover:bg-indigo-700 transition-all hover:shadow-md animate-fade-in"
+                                  title="Unduh Surat Ijin (Word)"
+                                >
+                                  {downloadingId === req.id ? (
+                                    <Loader2 size={12} className="animate-spin text-indigo-200" />
+                                  ) : (
+                                    <FileDown size={12} />
+                                  )}
+                                  <span>{downloadingId === req.id ? 'Loading...' : 'Unduh Doc'}</span>
+                                </button>
+                              )}
+                            </div>
                           )}
 
-                          {(onDelete && (userRole === 'KEPALA_SEKOLAH' || req.status === Status.PENDING)) && (
+                          {/* Tombol Hapus (Muncul untuk Admin atau jika status Menunggu/Ditolak untuk user) */}
+                          {(onDelete && (userRole === 'KEPALA_SEKOLAH' || req.status !== Status.APPROVED)) && (
                             <button 
                               onClick={() => handleDeleteClick(req.id, req.name)}
-                              className="text-slate-300 hover:text-red-500 transition-colors p-1 opacity-0 group-hover:opacity-100"
-                              title="Hapus"
+                              className="text-slate-300 hover:text-red-500 transition-colors p-1 opacity-0 group-hover:opacity-100 mt-1"
+                              title="Hapus Data"
                             >
                               <Trash2 size={12} />
                             </button>

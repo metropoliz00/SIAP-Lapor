@@ -1,3 +1,4 @@
+
 # Panduan Integrasi Google Spreadsheet & Apps Script
 
 Untuk menghubungkan aplikasi ini dengan Spreadsheet Anda, ikuti langkah-langkah berikut:
@@ -40,12 +41,41 @@ Header:
 
 ---
 
-## 2. Pasang Kode Backend (Apps Script)
+## 2. Persiapan Template Surat (Google Docs)
+
+Agar tombol **"Unduh Doc"** berfungsi, Anda harus membuat Template Surat Ijin di Google Docs.
+
+1.  Buat file Google Doc baru di Google Drive Anda.
+2.  Desain surat sesuai kop surat sekolah Anda.
+3.  Gunakan **Kata Kunci (Variables)** berikut di dalam dokumen, nanti akan otomatis diganti oleh sistem:
+
+    *   `{{NAMA}}` : Nama Pegawai
+    *   `{{NIP}}` : NIP Pegawai
+    *   `{{PANGKAT}}` : Pangkat / Golongan
+    *   `{{JABATAN}}` : Jabatan
+    *   `{{UNIT_KERJA}}` : Unit Kerja (Sekolah)
+    *   `{{JENIS_IJIN}}` : Jenis Ijin / Cuti
+    *   `{{ALASAN}}` : Alasan Ijin
+    *   `{{TANGGAL_MULAI}}` : Tanggal Mulai (Format Indo)
+    *   `{{TANGGAL_SELESAI}}` : Tanggal Selesai (Format Indo)
+    *   `{{JAM_MULAI}}` : Jam Mulai
+    *   `{{JAM_SELESAI}}` : Jam Selesai
+    *   `{{TANGGAL_SURAT}}` : Tanggal Hari Ini
+
+4.  Simpan file Doc tersebut.
+5.  Salin **ID Dokumen** dari URL di address bar browser.
+    *   Contoh URL: `docs.google.com/document/d/1abc12345xyz/edit`
+    *   ID-nya adalah: `1abc12345xyz`
+6.  Paste ID tersebut ke dalam variabel `TEMPLATE_ID` di kode Apps Script di bawah.
+
+---
+
+## 3. Pasang Kode Backend (Apps Script)
 
 1.  Di Spreadsheet, klik menu **Ekstensi (Extensions)** > **Apps Script**.
 2.  Hapus semua kode yang ada di file `Code.gs`.
 3.  Copy kode di bawah ini dan Paste ke editor tersebut.
-4.  Ganti `ID_TEMPLATE_DOC_ANDA_DISINI` jika Anda ingin fitur cetak PDF bekerja (opsional).
+4.  **PENTING:** Ganti `ID_TEMPLATE_DOC_ANDA_DISINI` dengan ID Template Google Doc yang sudah Anda buat tadi.
 5.  Klik icon **Save** (Disket).
 
 ```javascript
@@ -56,7 +86,8 @@ var SHEET_IJIN = "Data_Ijin";
 var SHEET_PEGAWAI = "Data_Pegawai";
 var SHEET_LOGIN = "Login";
 
-// (OPSIONAL) GANTI DENGAN ID GOOGLE DOC TEMPLATE UNTUK PDF
+// (WAJIB) GANTI DENGAN ID GOOGLE DOC TEMPLATE ANDA UNTUK FITUR DOC
+// Contoh: "1abc12345xyz..."
 var TEMPLATE_ID = "ID_TEMPLATE_DOC_ANDA_DISINI"; 
 
 function doPost(e) {
@@ -65,6 +96,12 @@ function doPost(e) {
 
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
+    
+    // Safety check jika JSON invalid
+    if (!e || !e.postData || !e.postData.contents) {
+       return responseJSON({ status: 'error', message: 'No post data' });
+    }
+
     var data = JSON.parse(e.postData.contents);
     var action = data.action;
 
@@ -251,13 +288,20 @@ function doPost(e) {
     }
 
     // ------------------------------------------------------------------
-    // 7. ACTION: DOWNLOAD PDF
+    // 7. ACTION: DOWNLOAD DOC (WORD)
     // ------------------------------------------------------------------
-    else if (data.action === 'download_pdf') {
-       if (!TEMPLATE_ID || TEMPLATE_ID === "ID_TEMPLATE_DOC_ANDA_DISINI") {
-         return responseJSON({ status: 'error', message: 'Template ID belum disetting' });
+    else if (action === 'download_doc') {
+       if (!TEMPLATE_ID || TEMPLATE_ID.includes("ID_TEMPLATE")) {
+         return responseJSON({ status: 'error', message: 'ERROR: Template ID belum disetting di Apps Script.' });
       }
-      var templateFile = DriveApp.getFileById(TEMPLATE_ID);
+      
+      var templateFile;
+      try {
+        templateFile = DriveApp.getFileById(TEMPLATE_ID);
+      } catch(e) {
+         return responseJSON({ status: 'error', message: 'ERROR: File Template tidak ditemukan. Periksa ID: ' + TEMPLATE_ID });
+      }
+
       var tempFile = templateFile.makeCopy("Temp_" + data.nama);
       var tempDoc = DocumentApp.openById(tempFile.getId());
       var body = tempDoc.getBody();
@@ -270,6 +314,7 @@ function doPost(e) {
         return d.getDate() + " " + months[d.getMonth()] + " " + d.getFullYear();
       };
 
+      // Replace Variables
       body.replaceText("{{NAMA}}", data.nama || "-");
       body.replaceText("{{NIP}}", data.nip || "-");
       body.replaceText("{{JABATAN}}", data.jabatan || "-");
@@ -283,17 +328,53 @@ function doPost(e) {
       body.replaceText("{{JAM_SELESAI}}", data.jamSelesai || "");
       body.replaceText("{{TANGGAL_SURAT}}", formatIndo(new Date().toISOString()));
 
+      // Save and Close is CRITICAL 
       tempDoc.saveAndClose();
-      var pdfContent = tempFile.getAs(MimeType.PDF);
-      var base64Data = Utilities.base64Encode(pdfContent.getBytes());
+      
+      // Export to DOCX
+      // Menggunakan UrlFetchApp untuk mengakses fitur export Drive
+      var url = "https://docs.google.com/document/d/" + tempFile.getId() + "/export?format=docx";
+      var token = ScriptApp.getOAuthToken();
+      var response = UrlFetchApp.fetch(url, {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        },
+        muteHttpExceptions: true
+      });
+      
+      if (response.getResponseCode() !== 200) {
+        return responseJSON({ status: 'error', message: 'Gagal convert ke DOCX. Response: ' + response.getContentText() });
+      }
+
+      var blob = response.getBlob();
+      var base64Data = Utilities.base64Encode(blob.getBytes());
+      
+      // Delete Temp File
       tempFile.setTrashed(true);
       
-      return responseJSON({ status: 'success', data: base64Data, filename: 'Surat_' + data.nama + '.pdf' });
+      return responseJSON({ status: 'success', data: base64Data, filename: 'Surat_Ijin_' + (data.nama || 'Guru') + '.docx' });
     }
 
     return responseJSON({ status: 'error', message: 'Unknown action' });
   } catch (e) {
-    return responseJSON({ status: 'error', message: e.toString() });
+    var msg = "Unknown Error";
+    if (e) {
+       if (e.message) msg = e.message;
+       else if (typeof e === 'string') msg = e;
+       else {
+         try {
+            msg = JSON.stringify(e);
+         } catch (err) {
+            msg = "Complex Error Object (Unserializable)";
+         }
+       }
+    }
+    
+    if (msg === '[object Object]' || typeof msg !== 'string') {
+        msg = "Internal Script Error (Check Apps Script logs)";
+    }
+    
+    return responseJSON({ status: 'error', message: msg });
   } finally {
     lock.releaseLock();
   }
@@ -310,16 +391,14 @@ function responseJSON(data) {
 }
 ```
 
-## 3. Deployment
+## 4. Deployment (PENTING!)
 
-1.  Klik tombol **Terapkan (Deploy)** di pojok kanan atas > **Deployment Baru (New deployment)**.
-2.  Klik icon roda gigi (Select type) > pilih **Aplikasi Web (Web app)**.
-3.  Isi Deskripsi (bebas, misal: "V2 - Update Kolom Pangkat").
-4.  Jalankan sebagai: **Saya (Me)**.
-5.  Yang memiliki akses (Who has access): **Siapa saja (Anyone)**.
-6.  Klik **Terapkan (Deploy)**.
-7.  Salin **URL Aplikasi Web (Web App URL)**.
+Setiap kali Anda mengubah kode di Apps Script:
 
-## 4. Koneksikan ke Aplikasi
+1.  Klik tombol **Terapkan (Deploy)** > **Kelola Penerapan (Manage deployments)**.
+2.  Klik **Icon Pensil (Edit)** pada deployment yang aktif.
+3.  Ubah **Versi** menjadi **Versi Baru (New version)**.
+4.  Pastikan "Who has access" = **Anyone (Siapa saja)**.
+5.  Klik **Terapkan (Deploy)**.
 
-Pastikan URL baru tersebut sudah terpasang di `services/sheetService.ts`.
+Jika Anda tidak membuat versi baru, perubahan kode tidak akan terbaca oleh aplikasi.

@@ -5,7 +5,7 @@ import { LeaveRequest, User, Status } from '../types';
 // =========================================================================================
 // 1. Deploy Apps Script (lihat APPS_SCRIPT_GUIDE.md)
 // 2. Copy 'Web App URL' dan paste di bawah ini:
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzK1yd4IqxAv2_5cJRZc42akFDVJ_PsMtjn7QwRoE74nw9uFYl5lynBSLpu7_J4BIgchg/exec'; 
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwKkeq5iAs1Gi8TNRwUItndnhSvECLIyaV0hfAQ4mMqA1CKnFiQifq20R-9beHspyWl1g/exec'; 
 
 // 3. (Opsional) Copy Link Spreadsheet Anda untuk tombol "Database" di Dashboard
 export const SPREADSHEET_URL_VIEW = ''; 
@@ -97,8 +97,8 @@ const getMockResponse = (payload: any) => {
     if (payload.action === 'get_requests') {
         return { status: 'success', data: MOCK_REQUESTS };
     }
-    if (payload.action === 'download_pdf') {
-       return { status: 'error', message: 'Fitur PDF butuh koneksi server' };
+    if (payload.action === 'download_doc') {
+       return { status: 'error', message: 'Fitur Download butuh koneksi server' };
     }
     return { status: 'success', message: 'Demo mode: Action simulated successfully' };
 };
@@ -161,16 +161,16 @@ export const deleteLeaveRequest = async (id: string) => {
 };
 
 /**
- * ACTION: DOWNLOAD_PDF
- * Meminta server membuat PDF berdasarkan template Doc
+ * ACTION: DOWNLOAD_DOC
+ * Meminta server membuat Docx berdasarkan template Doc
  */
-export const downloadPdf = async (request: LeaveRequest) => {
+export const downloadDoc = async (request: LeaveRequest) => {
   const payload = {
-    action: 'download_pdf',
+    action: 'download_doc',
     nama: request.name,
     nip: request.nip,
     jabatan: request.position,
-    pangkat: request.rank, // Include Pangkat for PDF
+    pangkat: request.rank, // Include Pangkat for Doc
     unit: request.department,
     tipe: request.type,
     alasan: request.reason,

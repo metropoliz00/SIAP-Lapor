@@ -148,11 +148,11 @@ export const UserManagement: React.FC<UserManagementProps> = ({ users, onUpdateU
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 text-[10px] uppercase tracking-wider text-slate-500 font-bold">
-                <th className="px-4 py-3">Nama Pegawai (A)</th>
-                <th className="px-4 py-3">NIP (B)</th>
-                <th className="px-4 py-3">Jabatan (C)</th>
-                <th className="px-4 py-3">Role (D)</th>
-                <th className="px-4 py-3">Pangkat (G)</th>
+                <th className="px-4 py-3">Nama Pegawai</th>
+                <th className="px-4 py-3">NIP</th>
+                <th className="px-4 py-3">Jabatan</th>
+                <th className="px-4 py-3">Role</th>
+                <th className="px-4 py-3">Pangkat</th>
                 <th className="px-4 py-3 text-center">Aksi</th>
               </tr>
             </thead>
