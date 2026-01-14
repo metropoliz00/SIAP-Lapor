@@ -26,14 +26,19 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
   const [endDate, setEndDate] = useState('');
   const [endTime, setEndTime] = useState('14:00');
   const [reason, setReason] = useState('');
+  
+  // Bug fix: Preserve existing ID and DocURL
   const [existingId, setExistingId] = useState<string | null>(null);
   const [existingCreatedAt, setExistingCreatedAt] = useState<string | null>(null);
+  const [existingDocUrl, setExistingDocUrl] = useState<string | undefined>(undefined);
 
   // Load initial data for editing
   useEffect(() => {
     if (initialData) {
       setExistingId(initialData.id);
       setExistingCreatedAt(initialData.createdAt);
+      setExistingDocUrl(initialData.docUrl); // Preserve Link
+      
       setStartDate(initialData.startDate.split('T')[0]); // Ensure date format
       setEndDate(initialData.endDate.split('T')[0]);
       setStartTime(initialData.startTime);
@@ -98,8 +103,9 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
       startTime,
       endTime,
       reason,
-      status: Status.PENDING, // Reset status to PENDING on edit
-      createdAt: existingCreatedAt || new Date().toISOString()
+      status: Status.PENDING, // Reset status to PENDING on edit to re-trigger approval
+      createdAt: existingCreatedAt || new Date().toISOString(),
+      docUrl: existingDocUrl // Keep the doc url if it exists
     };
 
     onSubmit(newRequest);

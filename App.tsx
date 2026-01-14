@@ -7,11 +7,13 @@ import { ProfileForm } from './components/ProfileForm';
 import { UserManagement } from './components/UserManagement';
 import { 
   syncToSpreadsheet, 
+  updateRequestToSheet,
   updateSheetStatus, 
   deleteLeaveRequest, 
   syncUsersToSpreadsheet, 
   getUsersFromSheet, 
-  getRequestsFromSheet 
+  getRequestsFromSheet,
+  generatePdf
 } from './services/sheetService';
 import { LayoutDashboard, PlusCircle, LogOut, Menu, X, CheckCircle2, Settings, Users, Bell, Loader2, RefreshCw } from 'lucide-react';
 
@@ -109,30 +111,21 @@ const App: React.FC = () => {
     let updatedRequests = [...requests];
     
     if (existingIndex >= 0) {
-      // Update existing
       updatedRequests[existingIndex] = request;
       setRequests(updatedRequests);
       setShowToast({ show: true, message: 'Pengajuan diperbarui!', type: 'success' });
-      // Note: Backend 'create' action simply appends in this basic version. 
-      // Ideally backend needs 'update' action. Since instructions focus on UI logic, 
-      // we reuse syncToSpreadsheet which will append a new row. 
-      // User can delete the old one or we just accept history log style.
-      // For better UX, we'll try to delete old one then create new one to simulate update?
-      // No, that's risky. We'll just append for now and let the newest one be valid.
-      // (Or assume backend handles it if we implemented it, but we didn't).
-      // Let's assume the user is okay with the UI being correct for now.
+      const success = await updateRequestToSheet(request);
+      if (!success) setShowToast({ show: true, message: 'Gagal update server.', type: 'error' });
     } else {
-      // Create new
       updatedRequests = [request, ...requests];
       setRequests(updatedRequests);
       setShowToast({ show: true, message: 'Ijin terkirim!', type: 'success' });
+      const success = await syncToSpreadsheet(request);
+      if (!success) setShowToast({ show: true, message: 'Gagal sinkronisasi server.', type: 'error' });
     }
 
     setView('DASHBOARD');
     setEditingRequest(null);
-
-    const success = await syncToSpreadsheet(request);
-    if (!success) setShowToast({ show: true, message: 'Gagal sinkronisasi server.', type: 'error' });
   };
 
   const handleEditRequest = (req: LeaveRequest) => {
@@ -161,6 +154,17 @@ const App: React.FC = () => {
     else setShowToast({ show: true, message: 'Gagal hapus di server.', type: 'info' });
   };
 
+  const handleGeneratePdf = async (req: LeaveRequest) => {
+    const url = await generatePdf(req);
+    if (url) {
+      // Update local state with the new URL
+      setRequests(requests.map(r => r.id === req.id ? { ...r, docUrl: url } : r));
+      setShowToast({ show: true, message: 'PDF Berhasil dibuat!', type: 'success' });
+    } else {
+      setShowToast({ show: true, message: 'Gagal membuat PDF. Cek Template/Folder ID.', type: 'error' });
+    }
+  };
+
   useEffect(() => {
     if (showToast.show) {
       const timer = setTimeout(() => setShowToast({ ...showToast, show: false }), 4000);
@@ -187,7 +191,7 @@ const App: React.FC = () => {
       onClick={() => { 
         setView(targetView); 
         setIsSidebarOpen(false); 
-        if (targetView === 'INPUT') setEditingRequest(null); // Reset edit when clicking menu
+        if (targetView === 'INPUT') setEditingRequest(null);
       }}
       className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 mb-0.5 text-sm ${
         view === targetView ? 'bg-brand-50 text-brand-700 font-bold shadow-sm' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
@@ -231,20 +235,14 @@ const App: React.FC = () => {
 
       {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/50 z-20 lg:hidden backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)} />}
 
-      {/* Sidebar - Compact Width w-64 */}
+      {/* Sidebar */}
       <aside className={`fixed lg:static inset-y-0 left-0 z-30 w-64 bg-white/95 backdrop-blur-sm border-r border-slate-200 shadow-xl lg:shadow-none transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="h-full flex flex-col">
           <div className="p-4 flex items-center justify-between border-b border-slate-50">
             <div className="flex items-center space-x-3">
-              <img 
-                src="https://siapsekolah.com/wp-content/uploads/2024/08/Kepala-Sekolah-1.png" 
-                alt="Logo" 
-                className="w-10 h-10 object-cover rounded-full border border-slate-100" 
-              />
+              <img src="https://siapsekolah.com/wp-content/uploads/2024/08/Kepala-Sekolah-1.png" alt="Logo" className="w-10 h-10 object-cover rounded-full border border-slate-100" />
               <div>
-                <span className="block text-base font-extrabold text-slate-800 leading-none">
-                  SIAP <span className="text-brand-600">Lapor</span>
-                </span>
+                <span className="block text-base font-extrabold text-slate-800 leading-none">SIAP <span className="text-brand-600">Lapor</span></span>
                 <span className="text-[9px] text-slate-400 font-bold tracking-wide">UPT SD Negeri Remen 2</span>
               </div>
             </div>
@@ -284,9 +282,7 @@ const App: React.FC = () => {
             <button onClick={() => setIsSidebarOpen(true)} className="text-slate-600 p-1"><Menu size={20} /></button>
             <div className="flex items-center gap-2">
               <img src="https://siapsekolah.com/wp-content/uploads/2024/08/Kepala-Sekolah-1.png" alt="Logo" className="w-8 h-8 object-cover rounded-full border border-slate-200" />
-              <span className="font-bold text-slate-800 text-sm">
-                SIAP <span className="text-brand-600">Lapor</span>
-              </span>
+              <span className="font-bold text-slate-800 text-sm">SIAP <span className="text-brand-600">Lapor</span></span>
             </div>
           </div>
         </header>
@@ -309,6 +305,7 @@ const App: React.FC = () => {
                   onDelete={handleDeleteRequest} 
                   onEdit={handleEditRequest}
                   onSyncUsers={handleSyncUsers}
+                  onGeneratePdf={handleGeneratePdf}
                 />
               ) : view === 'USER_MANAGEMENT' && currentUser.role === 'KEPALA_SEKOLAH' ? (
                 <UserManagement users={users} onUpdateUser={handleUpdateUserDatabase} onAddUser={handleAddUser} onSyncUsers={handleSyncUsers} />
@@ -325,10 +322,7 @@ const App: React.FC = () => {
             </div>
 
             <footer className="mt-auto pt-6 pb-2 border-t border-slate-200/50 text-center">
-              <p className="text-[10px] text-slate-400 font-medium">
-                @2026 | Dev Dedy Meyga Saputra, S.Pd, M.Pd <br className="md:hidden" /> 
-                <span className="hidden md:inline"> | </span> UPT SD Negeri Remen 2
-              </p>
+              <p className="text-[10px] text-slate-400 font-medium">@2026 | Dev Dedy Meyga Saputra, S.Pd, M.Pd <br className="md:hidden" /> <span className="hidden md:inline"> | </span> UPT SD Negeri Remen 2</p>
             </footer>
           </div>
         </div>

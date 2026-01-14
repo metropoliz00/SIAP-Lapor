@@ -1,4 +1,5 @@
 
+
 export enum Status {
   PENDING = 'Menunggu',
   APPROVED = 'Disetujui',
@@ -21,6 +22,13 @@ export const CutiTypes = {
   HAJI: 'Cuti Haji',
   SAKIT: 'Cuti Sakit',
   LAINNYA: 'Lainnya / Input Sendiri'
+};
+
+// Link Google Form
+export const FORM_LINKS = {
+  DISPENSASI_PRIBADI: 'https://docs.google.com/forms/d/e/1FAIpQLScMGl22gmgAXjBg_dMB30rXaTVGZLbpQiiWXyJdVtJ1RB__0g/viewform',
+  DISPENSASI_DINAS: 'https://docs.google.com/forms/d/e/1FAIpQLSfsQHG4r8RASmnxieutoZINa9qRDWUwlNQPljj_CWnDOEF8PA/viewform',
+  IJIN: 'https://docs.google.com/forms/d/e/1FAIpQLSeTMY4LVGQwAHIOmOy0eXqy3ESxMLly1vWRvnLdo9LoXz8sKA/viewform'
 };
 
 export interface User {
@@ -48,6 +56,7 @@ export interface LeaveRequest {
   reason: string;
   status: Status;
   createdAt: string;
+  docUrl?: string; // Kolom P (Merged Doc URL)
 }
 
 export type ViewState = 'LOGIN' | 'DASHBOARD' | 'INPUT' | 'PROFILE' | 'USER_MANAGEMENT';
