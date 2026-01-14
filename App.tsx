@@ -6,6 +6,7 @@ import { LoginForm } from './components/LoginForm';
 import { ProfileForm } from './components/ProfileForm';
 import { UserManagement } from './components/UserManagement';
 import { FormFrame } from './components/FormFrame';
+import { DatabaseView } from './components/DatabaseView';
 import { 
   syncToSpreadsheet, 
   updateRequestToSheet,
@@ -301,7 +302,7 @@ const App: React.FC = () => {
 
         <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 scroll-smooth">
           <div className="max-w-6xl mx-auto animate-fade-in pb-4 min-h-full flex flex-col">
-            {view !== 'FORM_VIEW' && (
+            {view !== 'FORM_VIEW' && view !== 'DATABASE' && (
                <div className="flex justify-end mb-3">
                 <button onClick={loadData} disabled={isLoadingData} className="flex items-center gap-1.5 text-[10px] md:text-xs font-bold text-slate-400 hover:text-brand-600 transition uppercase tracking-wide">
                     <RefreshCw size={12} className={isLoadingData ? 'animate-spin' : ''} /> {isLoadingData ? 'Memuat Data...' : 'Refresh Data'}
@@ -321,6 +322,7 @@ const App: React.FC = () => {
                   onSyncUsers={handleSyncUsers}
                   onGeneratePdf={handleGeneratePdf}
                   onOpenExternalForm={handleOpenExternalForm}
+                  onOpenDatabase={() => setView('DATABASE')}
                 />
               ) : view === 'USER_MANAGEMENT' && currentUser.role === 'KEPALA_SEKOLAH' ? (
                 <UserManagement users={users} onUpdateUser={handleUpdateUserDatabase} onAddUser={handleAddUser} onSyncUsers={handleSyncUsers} />
@@ -328,6 +330,8 @@ const App: React.FC = () => {
                 <ProfileForm user={currentUser} onSave={handleUpdateProfile} onCancel={() => setView('DASHBOARD')} />
               ) : view === 'FORM_VIEW' ? (
                 <FormFrame url={activeFormUrl} title={activeFormTitle} onClose={() => setView('DASHBOARD')} />
+              ) : view === 'DATABASE' ? (
+                <DatabaseView requests={requests} users={users} onClose={() => setView('DASHBOARD')} />
               ) : (
                 <LeaveForm 
                   currentUser={currentUser} 

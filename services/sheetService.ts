@@ -7,8 +7,9 @@ import { LeaveRequest, User, Status } from '../types';
 // 2. Copy 'Web App URL' dan paste di bawah ini:
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxNezfMOl02uGMEcek_km9KwMpC1x9UeDzG1BNiOp7cXfbZ1roPv6MZ7gWvbPni3Q5Vtg/exec'; 
 
-// 3. (Opsional) Copy Link Spreadsheet Anda untuk tombol "Database" di Dashboard
-export const SPREADSHEET_URL_VIEW = ''; 
+// 3. Masukkan Link Spreadsheet (Mode View/Edit) untuk menu Review di dalam aplikasi
+// Ganti URL di bawah ini dengan URL Google Sheet Anda.
+export const SPREADSHEET_URL_VIEW = 'https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/edit?usp=sharing'; 
 
 // =========================================================================================
 // DATA MOCK / DUMMY

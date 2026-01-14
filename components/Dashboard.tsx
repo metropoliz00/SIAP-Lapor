@@ -8,7 +8,7 @@ import {
   Legend
 } from 'recharts';
 import { LeaveRequest, Status, UserRole, FORM_LINKS, LeaveCategories } from '../types';
-import { CheckCircle, Clock, XCircle, FileText, TrendingUp, Calendar, Search, Check, X, Edit, UploadCloud, Trash2, ExternalLink, PenSquare, ChevronDown, ChevronUp } from 'lucide-react';
+import { CheckCircle, Clock, XCircle, FileText, TrendingUp, Calendar, Search, Check, X, Edit, UploadCloud, Trash2, ExternalLink, PenSquare, ChevronDown, ChevronUp, FileSpreadsheet } from 'lucide-react';
 import { SPREADSHEET_URL_VIEW } from '../services/sheetService';
 
 interface DashboardProps {
@@ -21,6 +21,7 @@ interface DashboardProps {
   onSyncUsers?: () => Promise<void>;
   onGeneratePdf?: (request: LeaveRequest) => Promise<void>;
   onOpenExternalForm?: (url: string, title: string) => void;
+  onOpenDatabase?: () => void;
 }
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
@@ -36,7 +37,7 @@ const StatCard = ({ icon: Icon, label, value, colorClass, bgClass }: any) => (
   </div>
 );
 
-export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onApprove, onReject, onDelete, onEdit, onSyncUsers, onOpenExternalForm }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onApprove, onReject, onDelete, onEdit, onSyncUsers, onOpenExternalForm, onOpenDatabase }) => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -95,21 +96,35 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
     let url = FORM_LINKS.IJIN; 
     let title = "Formulir Ijin";
 
+    // Logika pemetaan link sesuai permintaan
     if (req.type === LeaveCategories.DISPENSASI_DINAS) {
       url = FORM_LINKS.DISPENSASI_DINAS;
       title = "Form Dispensasi Dinas";
     } else if (req.type === LeaveCategories.DISPENSASI_PRIBADI) {
       url = FORM_LINKS.DISPENSASI_PRIBADI;
       title = "Form Dispensasi Pribadi";
+    } else if (req.type === LeaveCategories.IJIN) {
+      url = FORM_LINKS.IJIN;
+      title = "Formulir Ijin";
     } else if (req.type.includes('Cuti') || req.type === LeaveCategories.CUTI) {
       url = FORM_LINKS.CUTI;
       title = "Folder Cuti";
+      // KHUSUS CUTI: Buka di tab baru (sesuai request)
+      window.open(url, '_blank');
+      return; 
     }
     
+    // Tampilkan di dalam aplikasi (FormFrame) via props onOpenExternalForm
     if (onOpenExternalForm) {
       onOpenExternalForm(url, title);
-    } else {
-      window.open(url, '_blank');
+    }
+  };
+
+  const handleOpenReview = () => {
+    if (onOpenDatabase) {
+      onOpenDatabase();
+    } else if (SPREADSHEET_URL_VIEW) {
+      window.open(SPREADSHEET_URL_VIEW, '_blank');
     }
   };
 
@@ -126,10 +141,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
         </div>
         
         <div className="flex flex-col sm:flex-row gap-3">
-          {userRole === 'KEPALA_SEKOLAH' && SPREADSHEET_URL_VIEW && (
-            <a href={SPREADSHEET_URL_VIEW} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition shadow-sm font-bold text-xs md:text-sm">
-              <ExternalLink size={16} /><span>Database</span>
-            </a>
+          {userRole === 'KEPALA_SEKOLAH' && (
+            <button 
+              onClick={handleOpenReview}
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition shadow-sm font-bold text-xs md:text-sm"
+            >
+              <FileSpreadsheet size={16} /><span>Review Data</span>
+            </button>
           )}
           {userRole === 'KEPALA_SEKOLAH' && onSyncUsers && (
             <button onClick={handleSyncClick} disabled={isSyncing} className={`flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-sm font-bold text-xs md:text-sm ${isSyncing ? 'opacity-70 cursor-wait' : ''}`}>
@@ -236,8 +254,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
                                   onClick={() => handleOpenForm(req)}
                                   className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-indigo-600 text-white text-xs font-bold rounded-lg shadow-sm hover:bg-indigo-700 transition-all animate-fade-in active:scale-95"
                                 >
-                                  <PenSquare size={14} />
-                                  <span>Isi Form</span>
+                                  {/* Icon berbeda jika tipe Cuti */}
+                                  {req.type.includes('Cuti') || req.type === LeaveCategories.CUTI ? (
+                                    <>
+                                        <ExternalLink size={14} />
+                                        <span>Buka Drive</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                        <PenSquare size={14} />
+                                        <span>Isi Form</span>
+                                    </>
+                                  )}
                                 </button>
                               )}
                             </div>

@@ -42,12 +42,12 @@ export const ReasonOptions = {
   ]
 };
 
-// Link Google Form & Drive
+// Link Google Form & Drive (Updated with embedded=true)
 export const FORM_LINKS = {
-  DISPENSASI_PRIBADI: 'https://docs.google.com/forms/d/e/1FAIpQLScMGl22gmgAXjBg_dMB30rXaTVGZLbpQiiWXyJdVtJ1RB__0g/viewform',
-  DISPENSASI_DINAS: 'https://docs.google.com/forms/d/e/1FAIpQLSfsQHG4r8RASmnxieutoZINa9qRDWUwlNQPljj_CWnDOEF8PA/viewform',
-  IJIN: 'https://docs.google.com/forms/d/e/1FAIpQLSeTMY4LVGQwAHIOmOy0eXqy3ESxMLly1vWRvnLdo9LoXz8sKA/viewform',
-  CUTI: 'https://drive.google.com/drive/folders/1_sSTcWwbD6fEdKPo_6raLIjLm-oaIyvd?usp=sharing'
+  DISPENSASI_PRIBADI: 'https://docs.google.com/forms/d/e/1FAIpQLScMGl22gmgAXjBg_dMB30rXaTVGZLbpQiiWXyJdVtJ1RB__0g/viewform?embedded=true',
+  DISPENSASI_DINAS: 'https://docs.google.com/forms/d/e/1FAIpQLSfsQHG4r8RASmnxieutoZINa9qRDWUwlNQPljj_CWnDOEF8PA/viewform?embedded=true',
+  IJIN: 'https://docs.google.com/forms/d/e/1FAIpQLSeTMY4LVGQwAHIOmOy0eXqy3ESxMLly1vWRvnLdo9LoXz8sKA/viewform?embedded=true',
+  CUTI: 'https://drive.google.com/embeddedfolderview?id=1_sSTcWwbD6fEdKPo_6raLIjLm-oaIyvd#list'
 };
 
 export interface User {
@@ -78,4 +78,4 @@ export interface LeaveRequest {
   docUrl?: string; // Kolom P (Merged Doc URL)
 }
 
-export type ViewState = 'LOGIN' | 'DASHBOARD' | 'INPUT' | 'PROFILE' | 'USER_MANAGEMENT' | 'FORM_VIEW';
+export type ViewState = 'LOGIN' | 'DASHBOARD' | 'INPUT' | 'PROFILE' | 'USER_MANAGEMENT' | 'FORM_VIEW' | 'DATABASE';
