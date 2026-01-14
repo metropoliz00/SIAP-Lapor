@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LeaveRequest, Status, User, LeaveCategories, CutiTypes } from '../types';
-import { Send, Calendar, Clock, ChevronDown } from 'lucide-react';
+import { Send, Calendar } from 'lucide-react';
 
 interface LeaveFormProps {
   currentUser: User;

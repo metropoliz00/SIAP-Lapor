@@ -24,6 +24,17 @@ interface DashboardProps {
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
+// Komponen StatCard dipindahkan ke luar untuk menghindari re-creation setiap render
+const StatCard = ({ icon: Icon, label, value, colorClass, bgClass }: any) => (
+  <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center space-x-3 hover:shadow-md transition-shadow">
+    <div className={`p-2.5 ${bgClass} ${colorClass} rounded-lg`}><Icon size={20} /></div>
+    <div>
+      <p className="text-xs font-semibold text-slate-500 mb-0.5 uppercase tracking-wide">{label}</p>
+      <p className="text-2xl font-bold text-slate-800 tracking-tight leading-none">{value}</p>
+    </div>
+  </div>
+);
+
 export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onApprove, onReject, onDelete, onEdit, onSyncUsers }) => {
   const [isSyncing, setIsSyncing] = React.useState(false);
   
@@ -56,29 +67,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
   const handleOpenForm = (req: LeaveRequest) => {
     let url = FORM_LINKS.IJIN; // Default ke Link Ijin
 
+    // Cek tipe ijin
     if (req.type === LeaveCategories.DISPENSASI_DINAS) {
       url = FORM_LINKS.DISPENSASI_DINAS;
     } else if (req.type === LeaveCategories.DISPENSASI_PRIBADI) {
       url = FORM_LINKS.DISPENSASI_PRIBADI;
-    } 
-    // Untuk Cuti dan Ijin biasa tetap menggunakan FORM_LINKS.IJIN
-
+    } else if (req.type.includes('Cuti') || req.type === LeaveCategories.CUTI) {
+      // Jika tipe mengandung kata "Cuti", arahkan ke folder Drive
+      url = FORM_LINKS.CUTI;
+    }
+    
     window.open(url, '_blank');
   };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   };
-
-  const StatCard = ({ icon: Icon, label, value, colorClass, bgClass }: any) => (
-    <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center space-x-3 hover:shadow-md transition-shadow">
-      <div className={`p-2.5 ${bgClass} ${colorClass} rounded-lg`}><Icon size={20} /></div>
-      <div>
-        <p className="text-xs font-semibold text-slate-500 mb-0.5 uppercase tracking-wide">{label}</p>
-        <p className="text-2xl font-bold text-slate-800 tracking-tight leading-none">{value}</p>
-      </div>
-    </div>
-  );
 
   return (
     <div className="space-y-6">
@@ -218,7 +222,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
                   paddingAngle={5} 
                   dataKey="value"
                 >
-                  {typeData.map((entry, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
+                  {typeData.map((_, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
                 </Pie>
                 <Tooltip contentStyle={{ borderRadius: '8px', fontSize: '12px', padding: '8px 12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)' }} />
                 <Legend 

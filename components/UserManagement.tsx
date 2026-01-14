@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { User, UserRole } from '../types';
-import { Edit, Save, X, Search, User as UserIcon, Shield, Briefcase, Plus, UploadCloud, Key, Check, Award } from 'lucide-react';
+import { Edit, Save, X, Search, Plus, UploadCloud, Key, Check } from 'lucide-react';
 
 interface UserManagementProps {
   users: User[];

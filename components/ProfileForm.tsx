@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../types';
-import { Save, User as UserIcon, Briefcase, Shield, Key, Award } from 'lucide-react';
+import { Save, User as UserIcon, Briefcase, Shield, Award } from 'lucide-react';
 
 interface ProfileFormProps {
   user: User;

@@ -24,11 +24,12 @@ export const CutiTypes = {
   LAINNYA: 'Lainnya / Input Sendiri'
 };
 
-// Link Google Form
+// Link Google Form & Drive
 export const FORM_LINKS = {
   DISPENSASI_PRIBADI: 'https://docs.google.com/forms/d/e/1FAIpQLScMGl22gmgAXjBg_dMB30rXaTVGZLbpQiiWXyJdVtJ1RB__0g/viewform',
   DISPENSASI_DINAS: 'https://docs.google.com/forms/d/e/1FAIpQLSfsQHG4r8RASmnxieutoZINa9qRDWUwlNQPljj_CWnDOEF8PA/viewform',
-  IJIN: 'https://docs.google.com/forms/d/e/1FAIpQLSeTMY4LVGQwAHIOmOy0eXqy3ESxMLly1vWRvnLdo9LoXz8sKA/viewform'
+  IJIN: 'https://docs.google.com/forms/d/e/1FAIpQLSeTMY4LVGQwAHIOmOy0eXqy3ESxMLly1vWRvnLdo9LoXz8sKA/viewform',
+  CUTI: 'https://drive.google.com/drive/folders/1_sSTcWwbD6fEdKPo_6raLIjLm-oaIyvd?usp=sharing'
 };
 
 export interface User {
