@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { 
   PieChart, 
   Pie, 
@@ -8,7 +8,7 @@ import {
   Legend
 } from 'recharts';
 import { LeaveRequest, Status, UserRole, FORM_LINKS, LeaveCategories } from '../types';
-import { CheckCircle, Clock, XCircle, FileText, TrendingUp, Calendar, Search, Check, X, Edit, UploadCloud, Trash2, ExternalLink, PenSquare } from 'lucide-react';
+import { CheckCircle, Clock, XCircle, FileText, TrendingUp, Calendar, Search, Check, X, Edit, UploadCloud, Trash2, ExternalLink, PenSquare, ChevronDown, ChevronUp } from 'lucide-react';
 import { SPREADSHEET_URL_VIEW } from '../services/sheetService';
 
 interface DashboardProps {
@@ -36,7 +36,8 @@ const StatCard = ({ icon: Icon, label, value, colorClass, bgClass }: any) => (
 );
 
 export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onApprove, onReject, onDelete, onEdit, onSyncUsers }) => {
-  const [isSyncing, setIsSyncing] = React.useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   
   const total = requests.length;
   const approved = requests.filter(r => r.status === Status.APPROVED).length;
@@ -51,6 +52,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
     });
     return Object.keys(counts).map((key) => ({ name: key, value: counts[key] })).sort((a, b) => b.value - a.value);
   }, [requests]);
+
+  // Urutkan berdasarkan Tanggal Pembuatan (Terbaru diatas)
+  const sortedRequests = useMemo(() => {
+    return [...requests].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [requests]);
+
+  // Filter data untuk ditampilkan (3 atau Semua)
+  const displayedRequests = showAll ? sortedRequests : sortedRequests.slice(0, 3);
 
   const handleSyncClick = async () => {
     if (onSyncUsers) {
@@ -119,7 +128,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden h-fit">
           <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-            <h3 className="text-sm font-bold text-slate-700">Daftar Pengajuan</h3>
+            <h3 className="text-sm font-bold text-slate-700">Daftar Pengajuan ({showAll ? total : Math.min(3, total)})</h3>
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-slate-400" size={14} />
               <input type="text" placeholder="Cari..." className="pl-8 pr-3 py-1 text-xs border border-slate-300 rounded-md focus:outline-none focus:ring-1 focus:ring-brand-500 w-32 focus:w-48 transition-all" />
@@ -136,10 +145,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {requests.length === 0 ? (
+                {displayedRequests.length === 0 ? (
                   <tr><td colSpan={3} className="px-4 py-8 text-center text-xs text-slate-400">Belum ada data.</td></tr>
                 ) : (
-                  requests.map((req) => (
+                  displayedRequests.map((req) => (
                     <tr key={req.id} className="hover:bg-slate-50/80 transition-colors group">
                       <td className="px-4 py-3 align-top w-[25%]">
                         <div className="flex flex-col">
@@ -202,6 +211,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
               </tbody>
             </table>
           </div>
+          
+          {/* Tombol Lihat Semua */}
+          {requests.length > 3 && (
+            <div className="p-2 border-t border-slate-100 bg-slate-50/30 flex justify-center">
+               <button 
+                  onClick={() => setShowAll(!showAll)}
+                  className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-brand-600 hover:text-brand-700 hover:bg-brand-50 rounded-full transition-all"
+               >
+                  <span>{showAll ? 'Tutup Daftar' : 'Lihat Semua'}</span>
+                  {showAll ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+               </button>
+            </div>
+          )}
         </div>
 
         <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col">
