@@ -221,9 +221,43 @@ const App: React.FC = () => {
 
   if (isLoadingData) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-transparent gap-3 relative">
-        <Loader2 className="w-10 h-10 text-brand-600 animate-spin" />
-        <p className="text-xs text-slate-500 font-medium animate-pulse">Loading...</p>
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white text-slate-800">
+         {/* Decorative Background Elements */}
+         <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-brand-50/50 rounded-full blur-3xl opacity-60"></div>
+            <div className="absolute top-[20%] -right-[10%] w-[40%] h-[40%] bg-blue-50/50 rounded-full blur-3xl opacity-60"></div>
+         </div>
+
+         <div className="relative z-10 flex flex-col items-center animate-fade-in-up">
+            <div className="relative mb-6 group">
+               <div className="absolute inset-0 bg-brand-400 rounded-full blur-xl opacity-20 animate-pulse"></div>
+               <div className="relative bg-white p-1.5 rounded-full shadow-2xl border border-slate-100">
+                  <img 
+                    src="https://siapsekolah.com/wp-content/uploads/2024/08/Kepala-Sekolah-1.png" 
+                    alt="Logo" 
+                    className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover"
+                  />
+               </div>
+            </div>
+            
+            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">
+              SIAP <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-indigo-600">Lapor</span>
+            </h1>
+            <p className="text-xs md:text-sm font-semibold text-slate-400 uppercase tracking-[0.2em] mb-10">
+              UPT SD Negeri Remen 2
+            </p>
+
+            <div className="flex flex-col items-center gap-4">
+               <Loader2 size={32} className="text-brand-600 animate-spin" />
+               <p className="text-[10px] font-bold text-slate-400 animate-pulse tracking-wide">LOADING SYSTEM...</p>
+            </div>
+         </div>
+         
+         <div className="absolute bottom-8 text-center animate-fade-in">
+            <p className="text-[10px] text-slate-300 font-medium tracking-wide">
+              @2026 | Dev Dedy Meyga Saputra, S.Pd, M.Pd <br className="md:hidden" /> <span className="hidden md:inline"> | </span> UPT SD Negeri Remen 2
+            </p>
+         </div>
       </div>
     );
   }
@@ -233,7 +267,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-transparent flex font-sans relative">
+    <div className="h-full bg-transparent flex font-sans relative">
       {showToast.show && (
         <div className="fixed top-4 right-4 z-50 animate-fade-in-up">
           <div className={`px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 border text-sm ${
@@ -290,7 +324,7 @@ const App: React.FC = () => {
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col h-screen overflow-hidden">
+      <main className="flex-1 flex flex-col h-full overflow-hidden">
         <header className="lg:hidden bg-white/90 backdrop-blur-sm border-b border-slate-200 p-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
           <div className="flex items-center space-x-3">
             <button onClick={() => setIsSidebarOpen(true)} className="text-slate-600 p-1.5 hover:bg-slate-100 rounded-lg"><Menu size={22} /></button>
