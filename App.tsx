@@ -193,11 +193,11 @@ const App: React.FC = () => {
         setIsSidebarOpen(false); 
         if (targetView === 'INPUT') setEditingRequest(null);
       }}
-      className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 mb-0.5 text-sm ${
-        view === targetView ? 'bg-brand-50 text-brand-700 font-bold shadow-sm' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
+      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 mb-1 text-sm ${
+        view === targetView ? 'bg-brand-50 text-brand-700 font-bold shadow-sm ring-1 ring-brand-100' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
       }`}
     >
-      <Icon size={18} className={view === targetView ? 'text-brand-600' : 'text-slate-400'} />
+      <Icon size={20} className={view === targetView ? 'text-brand-600' : 'text-slate-400'} />
       <span>{label}</span>
     </button>
   );
@@ -220,66 +220,66 @@ const App: React.FC = () => {
       {/* Toast */}
       {showToast.show && (
         <div className="fixed top-4 right-4 z-50 animate-fade-in-up">
-          <div className={`px-3 py-2 rounded-lg shadow-md flex items-center gap-2 border text-sm ${
+          <div className={`px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 border text-sm ${
               showToast.type === 'success' ? 'bg-white border-green-200 text-green-800' : 
               showToast.type === 'error' ? 'bg-white border-red-200 text-red-800' : 
               'bg-white border-blue-200 text-blue-800'
           }`}>
-            {showToast.type === 'success' ? <CheckCircle2 size={16} /> : 
-             showToast.type === 'error' ? <X size={16} /> : <Bell size={16} />}
-            <span className="font-medium">{showToast.message}</span>
-            <button onClick={() => setShowToast({ ...showToast, show: false })} className="ml-2 opacity-50 hover:opacity-100"><X size={14} /></button>
+            {showToast.type === 'success' ? <CheckCircle2 size={18} /> : 
+             showToast.type === 'error' ? <X size={18} /> : <Bell size={18} />}
+            <span className="font-bold">{showToast.message}</span>
+            <button onClick={() => setShowToast({ ...showToast, show: false })} className="ml-2 opacity-50 hover:opacity-100"><X size={16} /></button>
           </div>
         </div>
       )}
 
       {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/50 z-20 lg:hidden backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)} />}
 
-      {/* Sidebar */}
-      <aside className={`fixed lg:static inset-y-0 left-0 z-30 w-64 bg-white/95 backdrop-blur-sm border-r border-slate-200 shadow-xl lg:shadow-none transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+      {/* Sidebar (Lebar diperbesar untuk laptop: w-72) */}
+      <aside className={`fixed lg:static inset-y-0 left-0 z-30 w-72 bg-white/95 backdrop-blur-sm border-r border-slate-200 shadow-xl lg:shadow-none transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="h-full flex flex-col">
-          <div className="p-4 flex items-center justify-between border-b border-slate-50">
+          <div className="p-6 flex items-center justify-between border-b border-slate-50">
             <div className="flex items-center space-x-3">
-              <img src="https://siapsekolah.com/wp-content/uploads/2024/08/Kepala-Sekolah-1.png" alt="Logo" className="w-10 h-10 object-cover rounded-full border border-slate-100" />
+              <img src="https://siapsekolah.com/wp-content/uploads/2024/08/Kepala-Sekolah-1.png" alt="Logo" className="w-10 h-10 object-cover rounded-full border border-slate-100 shadow-sm" />
               <div>
-                <span className="block text-base font-extrabold text-slate-800 leading-none">SIAP <span className="text-brand-600">Lapor</span></span>
-                <span className="text-[9px] text-slate-400 font-bold tracking-wide">UPT SD Negeri Remen 2</span>
+                <span className="block text-lg font-extrabold text-slate-800 leading-none">SIAP <span className="text-brand-600">Lapor</span></span>
+                <span className="text-[10px] text-slate-400 font-bold tracking-wide">UPT SD Negeri Remen 2</span>
               </div>
             </div>
-            <button className="lg:hidden text-slate-400 p-1" onClick={() => setIsSidebarOpen(false)}><X size={18} /></button>
+            <button className="lg:hidden text-slate-400 p-1 hover:text-slate-600" onClick={() => setIsSidebarOpen(false)}><X size={20} /></button>
           </div>
-          <div className="flex-1 px-3 py-3 overflow-y-auto">
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-3">Menu</div>
+          <div className="flex-1 px-4 py-4 overflow-y-auto">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-2">Menu Utama</div>
             <NavItem targetView="DASHBOARD" icon={LayoutDashboard} label="Dashboard" />
             <NavItem targetView="INPUT" icon={PlusCircle} label="Ajukan Ijin" />
             {currentUser.role === 'KEPALA_SEKOLAH' && (
               <>
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-4 mb-2 px-3">Admin</div>
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-6 mb-2 px-2">Administrasi</div>
                 <NavItem targetView="USER_MANAGEMENT" icon={Users} label="Data Pegawai" />
               </>
             )}
           </div>
-          <div className="p-3 border-t border-slate-100 bg-slate-50/50">
-             <div className="flex items-center justify-between mb-2 px-1">
-                <div className="flex items-center gap-2 overflow-hidden">
-                  <div className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-brand-700 text-xs font-bold shadow-sm">{currentUser.name.charAt(0)}</div>
+          <div className="p-4 border-t border-slate-100 bg-slate-50/50">
+             <div className="flex items-center justify-between mb-3 px-1">
+                <div className="flex items-center gap-3 overflow-hidden">
+                  <div className="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center text-brand-700 text-sm font-bold shadow-sm ring-1 ring-slate-100">{currentUser.name.charAt(0)}</div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-slate-800 truncate">{currentUser.name}</p>
-                    <p className="text-[10px] text-slate-500 font-mono truncate">{currentUser.nip}</p>
+                    <p className="text-sm font-bold text-slate-800 truncate">{currentUser.name}</p>
+                    <p className="text-[11px] text-slate-500 font-mono truncate">{currentUser.nip}</p>
                   </div>
                 </div>
-                <button onClick={() => { setView('PROFILE'); setIsSidebarOpen(false); }} className="p-1.5 text-slate-400 hover:text-brand-600 rounded-md transition" title="Profil"><Settings size={16} /></button>
+                <button onClick={() => { setView('PROFILE'); setIsSidebarOpen(false); }} className="p-2 text-slate-400 hover:text-brand-600 rounded-lg hover:bg-white transition shadow-sm" title="Profil"><Settings size={18} /></button>
              </div>
-            <button onClick={handleLogout} className="w-full flex items-center justify-center space-x-2 px-3 py-2 bg-white border border-slate-200 text-red-600 hover:bg-red-50 rounded-lg transition text-xs font-bold shadow-sm"><LogOut size={14} /><span>Keluar</span></button>
+            <button onClick={handleLogout} className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 bg-white border border-slate-200 text-red-600 hover:bg-red-50 hover:border-red-100 rounded-xl transition text-xs font-bold shadow-sm active:scale-95"><LogOut size={16} /><span>Keluar Aplikasi</span></button>
           </div>
         </div>
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
-        <header className="lg:hidden bg-white/90 backdrop-blur-sm border-b border-slate-200 p-3 flex items-center justify-between sticky top-0 z-10 shadow-sm">
-          <div className="flex items-center space-x-2">
-            <button onClick={() => setIsSidebarOpen(true)} className="text-slate-600 p-1"><Menu size={20} /></button>
+        <header className="lg:hidden bg-white/90 backdrop-blur-sm border-b border-slate-200 p-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+          <div className="flex items-center space-x-3">
+            <button onClick={() => setIsSidebarOpen(true)} className="text-slate-600 p-1.5 hover:bg-slate-100 rounded-lg"><Menu size={22} /></button>
             <div className="flex items-center gap-2">
               <img src="https://siapsekolah.com/wp-content/uploads/2024/08/Kepala-Sekolah-1.png" alt="Logo" className="w-8 h-8 object-cover rounded-full border border-slate-200" />
               <span className="font-bold text-slate-800 text-sm">SIAP <span className="text-brand-600">Lapor</span></span>
@@ -287,11 +287,11 @@ const App: React.FC = () => {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-4 scroll-smooth">
-          <div className="max-w-5xl mx-auto animate-fade-in pb-2 min-h-full flex flex-col">
-            <div className="flex justify-end mb-2">
-              <button onClick={loadData} disabled={isLoadingData} className="flex items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-brand-600 transition">
-                <RefreshCw size={12} className={isLoadingData ? 'animate-spin' : ''} /> {isLoadingData ? '...' : 'REFRESH'}
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 scroll-smooth">
+          <div className="max-w-6xl mx-auto animate-fade-in pb-4 min-h-full flex flex-col">
+            <div className="flex justify-end mb-3">
+              <button onClick={loadData} disabled={isLoadingData} className="flex items-center gap-1.5 text-[10px] md:text-xs font-bold text-slate-400 hover:text-brand-600 transition uppercase tracking-wide">
+                <RefreshCw size={12} className={isLoadingData ? 'animate-spin' : ''} /> {isLoadingData ? 'Memuat Data...' : 'Refresh Data'}
               </button>
             </div>
 
@@ -321,7 +321,7 @@ const App: React.FC = () => {
               )}
             </div>
 
-            <footer className="mt-auto pt-6 pb-2 border-t border-slate-200/50 text-center">
+            <footer className="mt-auto pt-8 pb-2 border-t border-slate-200/50 text-center">
               <p className="text-[10px] text-slate-400 font-medium">@2026 | Dev Dedy Meyga Saputra, S.Pd, M.Pd <br className="md:hidden" /> <span className="hidden md:inline"> | </span> UPT SD Negeri Remen 2</p>
             </footer>
           </div>

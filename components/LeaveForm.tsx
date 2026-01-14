@@ -22,7 +22,7 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
   const [customCutiInput, setCustomCutiInput] = useState<string>('');
 
   // State for Reasons
-  const [selectedReasonOption, setSelectedReasonOption] = useState<string>(''); // Untuk radio button
+  const [selectedReasonOption, setSelectedReasonOption] = useState<string>(''); // Untuk dropdown
   const [customReasonText, setCustomReasonText] = useState<string>(''); // Untuk text area (Lainnya atau manual)
 
   const [startDate, setStartDate] = useState('');
@@ -192,50 +192,50 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
   };
 
   return (
-    <div className="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-sm border border-slate-200 animate-fade-in">
-      <header className="mb-4 border-b border-slate-100 pb-3">
-        <h2 className="text-xl font-bold text-slate-800">{initialData ? 'Edit Pengajuan' : 'Form Pengajuan'}</h2>
-        <p className="text-xs text-slate-500">Lengkapi data untuk mengajukan ijin.</p>
+    <div className="max-w-4xl mx-auto bg-white p-5 md:p-8 rounded-2xl shadow-sm border border-slate-200 animate-fade-in">
+      <header className="mb-6 border-b border-slate-100 pb-4">
+        <h2 className="text-xl md:text-2xl font-bold text-slate-800">{initialData ? 'Edit Pengajuan' : 'Form Pengajuan'}</h2>
+        <p className="text-sm text-slate-500 mt-1">Lengkapi data di bawah ini dengan benar.</p>
       </header>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Identitas Diri (Compact) */}
-        <div className="bg-slate-50/50 p-3 rounded-lg border border-slate-100">
-          <div className="grid grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Identitas Diri (Compact Responsive) */}
+        <div className="bg-slate-50/50 p-4 md:p-5 rounded-xl border border-slate-100">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wide">Nama</label>
-              <div className="text-sm font-semibold text-slate-800">{name}</div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-0.5">Nama</label>
+              <div className="text-sm md:text-base font-semibold text-slate-800 truncate">{name}</div>
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wide">NIP</label>
-              <div className="text-sm font-mono text-slate-600">{nip}</div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-0.5">NIP</label>
+              <div className="text-sm md:text-base font-mono text-slate-600 truncate">{nip}</div>
             </div>
             <div>
-               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wide">Jabatan</label>
-               <div className="text-xs text-slate-700">{position}</div>
+               <label className="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-0.5">Jabatan</label>
+               <div className="text-sm text-slate-700 truncate">{position}</div>
             </div>
             <div>
-               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wide">Pangkat/Golongan</label>
-               <div className="text-xs text-slate-700 font-medium">{rank}</div>
+               <label className="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-0.5">Pangkat</label>
+               <div className="text-sm text-slate-700 font-medium truncate">{rank}</div>
             </div>
           </div>
         </div>
 
         {/* Form Fields */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
             {/* Logic Selection Jenis Ijin */}
-            <div className="md:col-span-2 space-y-3 p-3 border border-brand-100 bg-brand-50/30 rounded-lg">
-                <label className="block text-xs font-bold text-slate-700">Kategori Ijin</label>
+            <div className="lg:col-span-2 space-y-3 p-4 border border-brand-100 bg-brand-50/30 rounded-xl">
+                <label className="block text-sm font-bold text-slate-800">Kategori Ijin</label>
                 
                 {/* Main Category Selection (Radio Style Cards) */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {Object.values(LeaveCategories).map((cat) => (
                     <label key={cat} 
-                      className={`cursor-pointer border rounded-lg p-2 flex items-center justify-center text-xs font-medium transition-all text-center h-full
+                      className={`cursor-pointer border rounded-lg p-3 min-h-[3rem] flex items-center justify-center text-xs md:text-sm font-medium transition-all text-center h-full active:scale-95 select-none
                       ${mainCategory === cat 
-                        ? 'bg-brand-600 text-white border-brand-600 shadow-sm' 
-                        : 'bg-white text-slate-600 border-slate-200 hover:border-brand-300'}`}
+                        ? 'bg-brand-600 text-white border-brand-600 shadow-md ring-2 ring-brand-200 ring-offset-1' 
+                        : 'bg-white text-slate-600 border-slate-200 hover:border-brand-300 hover:bg-slate-50'}`}
                     >
                       <input 
                         type="radio" 
@@ -257,13 +257,13 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
 
                 {/* Sub Options for CUTI */}
                 {mainCategory === LeaveCategories.CUTI && (
-                  <div className="animate-fade-in mt-2 bg-white p-3 rounded border border-slate-200">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Jenis Cuti</label>
-                    <div className="grid grid-cols-1 gap-2">
+                  <div className="animate-fade-in mt-3 bg-white p-4 rounded-lg border border-slate-200">
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Jenis Cuti</label>
+                    <div className="grid grid-cols-1 gap-3">
                       <select
                         value={selectedCutiType}
                         onChange={(e) => setSelectedCutiType(e.target.value)}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-500 outline-none text-sm bg-white"
+                        className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-sm bg-white"
                       >
                         {Object.values(CutiTypes).map((t) => (
                           <option key={t} value={t}>{t}</option>
@@ -278,7 +278,7 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
                             value={customCutiInput}
                             onChange={(e) => setCustomCutiInput(e.target.value)}
                             placeholder="Tuliskan jenis cuti..."
-                            className="w-full px-3 py-2 border border-brand-300 rounded-lg focus:ring-1 focus:ring-brand-500 outline-none text-sm"
+                            className="w-full px-4 py-2.5 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-sm"
                             required
                           />
                         </div>
@@ -289,53 +289,53 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
             </div>
 
             {/* Waktu Mulai */}
-            <div className="border border-slate-200 rounded-lg p-3 bg-white">
-              <label className="block text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5">
-                <Calendar className="text-brand-500" size={14} /> Mulai
+            <div className="border border-slate-200 rounded-xl p-4 bg-white">
+              <label className="block text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
+                <Calendar className="text-brand-500" size={18} /> Tanggal Mulai
               </label>
-              <div className="grid grid-cols-3 gap-2">
-                <div className="col-span-2">
+              <div className="grid grid-cols-5 gap-3">
+                <div className="col-span-3">
                    <input
                     type="date"
                     required
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full px-2 py-1.5 border border-slate-200 rounded focus:border-brand-500 outline-none text-xs"
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-sm"
                   />
                 </div>
-                <div>
+                <div className="col-span-2">
                    <input
                         type="time"
                         required
                         value={startTime}
                         onChange={(e) => setStartTime(e.target.value)}
-                        className="w-full px-1 py-1.5 border border-slate-200 rounded focus:border-brand-500 outline-none text-xs text-center"
+                        className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-sm text-center"
                       />
                 </div>
               </div>
             </div>
 
             {/* Waktu Selesai */}
-            <div className="border border-slate-200 rounded-lg p-3 bg-white">
-              <label className="block text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5">
-                <Calendar className="text-slate-400" size={14} /> Selesai
+            <div className="border border-slate-200 rounded-xl p-4 bg-white">
+              <label className="block text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
+                <Calendar className="text-slate-400" size={18} /> Tanggal Selesai
               </label>
-              <div className="grid grid-cols-3 gap-2">
-                <div className="col-span-2">
+              <div className="grid grid-cols-5 gap-3">
+                <div className="col-span-3">
                    <input
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full px-2 py-1.5 border border-slate-200 rounded focus:border-brand-500 outline-none text-xs"
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-sm"
                   />
                 </div>
-                <div>
+                <div className="col-span-2">
                       <input
                         type="time"
                         required
                         value={endTime}
                         onChange={(e) => setEndTime(e.target.value)}
-                        className="w-full px-1 py-1.5 border border-slate-200 rounded focus:border-brand-500 outline-none text-xs text-center"
+                        className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-sm text-center"
                       />
                 </div>
               </div>
@@ -343,48 +343,42 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
         </div>
 
         {/* ALASAN SECTION (Dynamic) */}
-        <div className="animate-fade-in">
-          <label className="block text-xs font-bold text-slate-700 mb-1.5">Alasan Detail</label>
+        <div className="animate-fade-in pt-2">
+          <label className="block text-sm font-bold text-slate-800 mb-2">Alasan Detail</label>
 
-          {/* Logic Pilihan untuk Dispensasi Pribadi */}
+          {/* Logic Dropdown untuk Dispensasi Pribadi */}
           {mainCategory === LeaveCategories.DISPENSASI_PRIBADI && (
-             <div className="space-y-2 mb-2">
-               {ReasonOptions.DISPENSASI_PRIBADI.map((opt) => (
-                  <label key={opt} className={`flex items-start gap-2 p-2 rounded-lg border cursor-pointer transition-all ${selectedReasonOption === opt ? 'bg-brand-50 border-brand-200' : 'bg-white border-slate-200 hover:bg-slate-50'}`}>
-                      <input 
-                         type="radio" 
-                         name="reasonOption" 
-                         value={opt} 
-                         checked={selectedReasonOption === opt} 
-                         onChange={(e) => setSelectedReasonOption(e.target.value)}
-                         className="mt-0.5"
-                      />
-                      <span className="text-xs text-slate-700">{opt}</span>
-                  </label>
-               ))}
+             <div className="mb-3">
+               <select
+                 value={selectedReasonOption}
+                 onChange={(e) => setSelectedReasonOption(e.target.value)}
+                 className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-sm bg-white shadow-sm"
+               >
+                 <option value="">-- Pilih Alasan --</option>
+                 {ReasonOptions.DISPENSASI_PRIBADI.map((opt) => (
+                    <option key={opt} value={opt}>{opt}</option>
+                 ))}
+               </select>
              </div>
           )}
 
-          {/* Logic Pilihan untuk Dispensasi Dinas */}
+          {/* Logic Dropdown untuk Dispensasi Dinas */}
           {mainCategory === LeaveCategories.DISPENSASI_DINAS && (
-             <div className="space-y-2 mb-2">
-               {ReasonOptions.DISPENSASI_DINAS.map((opt) => (
-                  <label key={opt} className={`flex items-start gap-2 p-2 rounded-lg border cursor-pointer transition-all ${selectedReasonOption === opt ? 'bg-brand-50 border-brand-200' : 'bg-white border-slate-200 hover:bg-slate-50'}`}>
-                      <input 
-                         type="radio" 
-                         name="reasonOption" 
-                         value={opt} 
-                         checked={selectedReasonOption === opt} 
-                         onChange={(e) => setSelectedReasonOption(e.target.value)}
-                         className="mt-0.5"
-                      />
-                      <span className="text-xs text-slate-700">{opt}</span>
-                  </label>
-               ))}
+             <div className="mb-3">
+               <select
+                 value={selectedReasonOption}
+                 onChange={(e) => setSelectedReasonOption(e.target.value)}
+                 className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-sm bg-white shadow-sm"
+               >
+                 <option value="">-- Pilih Alasan Dinas --</option>
+                 {ReasonOptions.DISPENSASI_DINAS.map((opt) => (
+                    <option key={opt} value={opt}>{opt}</option>
+                 ))}
+               </select>
              </div>
           )}
 
-          {/* Manual Text Area: Muncul jika kategori lain, atau jika pilih opsi 'Lainnya' */}
+          {/* Manual Text Area: Muncul jika kategori lain, atau jika pilih opsi 'Lainnya' dari dropdown */}
           {(
              mainCategory === LeaveCategories.IJIN || 
              mainCategory === LeaveCategories.CUTI || 
@@ -395,26 +389,26 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
                 required
                 value={customReasonText}
                 onChange={(e) => setCustomReasonText(e.target.value)}
-                rows={3}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-500 outline-none text-sm text-slate-700 animate-fade-in"
+                rows={4}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-sm text-slate-700 animate-fade-in shadow-sm placeholder:text-slate-400"
                 placeholder={mainCategory.includes('Dispensasi') ? "Tuliskan detail alasan..." : "Tuliskan keterangan ijin/cuti..."}
               />
           )}
         </div>
 
-        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-6 border-t border-slate-100 mt-2">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 border border-slate-300 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-50 transition"
+            className="w-full sm:w-auto px-6 py-3 border border-slate-300 text-slate-700 font-bold text-sm rounded-xl hover:bg-slate-50 transition active:scale-95"
           >
             Batal
           </button>
           <button
             type="submit"
-            className="px-4 py-2 bg-brand-600 text-white text-xs font-bold rounded-lg hover:bg-brand-700 transition flex items-center gap-2"
+            className="w-full sm:w-auto px-6 py-3 bg-brand-600 text-white font-bold text-sm rounded-xl hover:bg-brand-700 transition shadow-lg shadow-brand-200 flex items-center justify-center gap-2 active:scale-95"
           >
-            <Send size={14} />
+            <Send size={18} />
             {initialData ? 'Update Pengajuan' : 'Kirim Pengajuan'}
           </button>
         </div>
