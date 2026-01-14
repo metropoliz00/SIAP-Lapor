@@ -36,7 +36,6 @@ const App: React.FC = () => {
   const [dbError, setDbError] = useState<string>('');
   const [editingRequest, setEditingRequest] = useState<LeaveRequest | null>(null);
   
-  // External Form State
   const [activeFormUrl, setActiveFormUrl] = useState('');
   const [activeFormTitle, setActiveFormTitle] = useState('');
 
@@ -54,7 +53,6 @@ const App: React.FC = () => {
       if (fetchedUsers && fetchedUsers.length > 0) {
         setUsers(fetchedUsers);
       } else {
-        console.warn("Database user kosong.");
         setDbError("Gagal memuat data pegawai.");
       }
 
@@ -62,7 +60,6 @@ const App: React.FC = () => {
         setRequests(fetchedRequests);
       }
     } catch (error) {
-      console.error("Critical Error loading data:", error);
       setDbError("Kesalahan jaringan.");
       setShowToast({ show: true, message: 'Gagal terhubung ke database.', type: 'error' });
     } finally {
@@ -102,9 +99,17 @@ const App: React.FC = () => {
     if (currentUser && currentUser.nip === originalNip) setCurrentUser(updatedUser);
   };
 
-  const handleAddUser = (newUser: User) => {
-    setUsers([...users, newUser]);
-    setShowToast({ show: true, message: 'Pegawai ditambahkan.', type: 'info' });
+  const handleAddUser = async (newUser: User) => {
+    const newUsers = [...users, newUser];
+    setUsers(newUsers);
+    setShowToast({ show: true, message: 'Menyimpan ke server...', type: 'info' });
+    
+    const success = await syncUsersToSpreadsheet(newUsers);
+    if (success) {
+      setShowToast({ show: true, message: 'Pegawai berhasil ditambahkan!', type: 'success' });
+    } else {
+      setShowToast({ show: true, message: 'Gagal sinkronisasi server.', type: 'error' });
+    }
   };
 
   const handleSyncUsers = async () => {
@@ -164,7 +169,6 @@ const App: React.FC = () => {
   const handleGeneratePdf = async (req: LeaveRequest) => {
     const url = await generatePdf(req);
     if (url) {
-      // Update local state with the new URL
       setRequests(requests.map(r => r.id === req.id ? { ...r, docUrl: url } : r));
       setShowToast({ show: true, message: 'PDF Berhasil dibuat!', type: 'success' });
     } else {
@@ -230,7 +234,6 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-transparent flex font-sans relative">
-      {/* Toast */}
       {showToast.show && (
         <div className="fixed top-4 right-4 z-50 animate-fade-in-up">
           <div className={`px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 border text-sm ${
@@ -248,7 +251,6 @@ const App: React.FC = () => {
 
       {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/50 z-20 lg:hidden backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)} />}
 
-      {/* Sidebar (Lebar diperbesar untuk laptop: w-72) */}
       <aside className={`fixed lg:static inset-y-0 left-0 z-30 w-72 bg-white/95 backdrop-blur-sm border-r border-slate-200 shadow-xl lg:shadow-none transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="h-full flex flex-col">
           <div className="p-6 flex items-center justify-between border-b border-slate-50">
@@ -288,7 +290,6 @@ const App: React.FC = () => {
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
         <header className="lg:hidden bg-white/90 backdrop-blur-sm border-b border-slate-200 p-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
           <div className="flex items-center space-x-3">
@@ -325,7 +326,12 @@ const App: React.FC = () => {
                   onOpenDatabase={() => setView('DATABASE')}
                 />
               ) : view === 'USER_MANAGEMENT' && currentUser.role === 'KEPALA_SEKOLAH' ? (
-                <UserManagement users={users} onUpdateUser={handleUpdateUserDatabase} onAddUser={handleAddUser} onSyncUsers={handleSyncUsers} />
+                <UserManagement 
+                  users={users} 
+                  onUpdateUser={handleUpdateUserDatabase} 
+                  onAddUser={handleAddUser} 
+                  onSyncUsers={handleSyncUsers} 
+                />
               ) : view === 'PROFILE' ? (
                 <ProfileForm user={currentUser} onSave={handleUpdateProfile} onCancel={() => setView('DASHBOARD')} />
               ) : view === 'FORM_VIEW' ? (

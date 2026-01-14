@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, UserRole } from '../types';
 import { Edit, Save, X, Search, Plus, UploadCloud, Key, Check } from 'lucide-react';
 
@@ -7,9 +7,11 @@ interface UserManagementProps {
   onUpdateUser: (originalNip: string, updatedUser: User) => void;
   onAddUser: (newUser: User) => void;
   onSyncUsers: () => void;
+  forceOpenAddModal?: boolean; // New prop
+  onModalClosed?: () => void; // New prop
 }
 
-export const UserManagement: React.FC<UserManagementProps> = ({ users, onUpdateUser, onAddUser, onSyncUsers }) => {
+export const UserManagement: React.FC<UserManagementProps> = ({ users, onUpdateUser, onAddUser, onSyncUsers, forceOpenAddModal, onModalClosed }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isAddingUser, setIsAddingUser] = useState(false);
@@ -17,6 +19,13 @@ export const UserManagement: React.FC<UserManagementProps> = ({ users, onUpdateU
   const [inlineEditingNip, setInlineEditingNip] = useState<string | null>(null);
   const [inlineFormData, setInlineFormData] = useState<User | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
+
+  // Trigger add modal if forceOpenAddModal is true
+  useEffect(() => {
+    if (forceOpenAddModal && !isAddingUser) {
+      handleAddClick();
+    }
+  }, [forceOpenAddModal]);
 
   const filteredUsers = users.filter(user => 
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -46,6 +55,13 @@ export const UserManagement: React.FC<UserManagementProps> = ({ users, onUpdateU
     setIsAddingUser(true);
   };
 
+  const closeModals = () => {
+    setEditingUser(null);
+    setIsAddingUser(false);
+    setFormData(null);
+    if (onModalClosed) onModalClosed();
+  };
+
   const handleSaveModal = (e: React.FormEvent) => {
     e.preventDefault();
     if (formData) {
@@ -61,6 +77,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ users, onUpdateU
         setEditingUser(null);
       }
       setFormData(null);
+      if (onModalClosed) onModalClosed();
     }
   };
 
@@ -239,7 +256,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ users, onUpdateU
               <h3 className="text-lg font-bold text-slate-800">
                 {isAddingUser ? 'Tambah Pegawai' : 'Edit Akun'}
               </h3>
-              <button onClick={() => { setEditingUser(null); setIsAddingUser(false); }} className="text-slate-400 hover:text-slate-600">
+              <button onClick={closeModals} className="text-slate-400 hover:text-slate-600">
                 <X size={20} />
               </button>
             </div>
@@ -299,7 +316,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ users, onUpdateU
               </div>
 
               <div className="flex gap-2 pt-4">
-                <button type="button" onClick={() => { setEditingUser(null); setIsAddingUser(false); }}
+                <button type="button" onClick={closeModals}
                   className="flex-1 px-3 py-2 border border-slate-300 text-slate-700 font-bold text-xs rounded hover:bg-slate-50">Batal</button>
                 <button type="submit" className="flex-1 px-3 py-2 bg-brand-600 text-white font-bold text-xs rounded hover:bg-brand-700 shadow-sm flex items-center justify-center gap-1">
                   <Save size={14} /> Simpan

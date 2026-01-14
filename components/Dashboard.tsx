@@ -8,7 +8,7 @@ import {
   Legend
 } from 'recharts';
 import { LeaveRequest, Status, UserRole, FORM_LINKS, LeaveCategories } from '../types';
-import { CheckCircle, Clock, XCircle, FileText, TrendingUp, Calendar, Search, Check, X, Edit, UploadCloud, Trash2, ExternalLink, PenSquare, ChevronDown, ChevronUp, FileSpreadsheet } from 'lucide-react';
+import { CheckCircle, Clock, XCircle, FileText, TrendingUp, Calendar, Search, Check, X, Edit, Trash2, ExternalLink, PenSquare, ChevronDown, ChevronUp, FileSpreadsheet } from 'lucide-react';
 import { SPREADSHEET_URL_VIEW } from '../services/sheetService';
 
 interface DashboardProps {
@@ -26,7 +26,6 @@ interface DashboardProps {
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
-// Komponen StatCard (Updated for responsiveness)
 const StatCard = ({ icon: Icon, label, value, colorClass, bgClass }: any) => (
   <div className="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center space-x-4 hover:shadow-md transition-shadow">
     <div className={`p-3 md:p-4 ${bgClass} ${colorClass} rounded-xl`}><Icon size={24} className="md:w-7 md:h-7" /></div>
@@ -38,7 +37,6 @@ const StatCard = ({ icon: Icon, label, value, colorClass, bgClass }: any) => (
 );
 
 export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onApprove, onReject, onDelete, onEdit, onSyncUsers, onOpenExternalForm, onOpenDatabase }) => {
-  const [isSyncing, setIsSyncing] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -56,12 +54,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
     return Object.keys(counts).map((key) => ({ name: key, value: counts[key] })).sort((a, b) => b.value - a.value);
   }, [requests]);
 
-  // Filter & Sort Logic
   const displayedRequests = useMemo(() => {
-    // 1. Sort by Date (Newest first)
     let data = [...requests].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-    // 2. Filter by Search Term
     if (searchTerm.trim()) {
       const lowerTerm = searchTerm.toLowerCase();
       data = data.filter(req => 
@@ -71,22 +65,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
         req.reason.toLowerCase().includes(lowerTerm)
       );
     }
-
-    // 3. Slice logic (Show 3 or All) - Jika sedang search, tampilkan semua hasil match
     if (!showAll && !searchTerm.trim()) {
       return data.slice(0, 3);
     }
-
     return data;
   }, [requests, searchTerm, showAll]);
-
-  const handleSyncClick = async () => {
-    if (onSyncUsers) {
-      setIsSyncing(true);
-      await onSyncUsers();
-      setTimeout(() => setIsSyncing(false), 2000);
-    }
-  };
 
   const handleDeleteClick = (id: string, name: string) => {
     if (onDelete && window.confirm(`Hapus data ijin "${name}"?`)) onDelete(id);
@@ -96,7 +79,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
     let url = FORM_LINKS.IJIN; 
     let title = "Formulir Ijin";
 
-    // Logika pemetaan link sesuai permintaan
     if (req.type === LeaveCategories.DISPENSASI_DINAS) {
       url = FORM_LINKS.DISPENSASI_DINAS;
       title = "Form Dispensasi Dinas";
@@ -109,12 +91,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
     } else if (req.type.includes('Cuti') || req.type === LeaveCategories.CUTI) {
       url = FORM_LINKS.CUTI;
       title = "Folder Cuti";
-      // KHUSUS CUTI: Buka di tab baru (sesuai request)
       window.open(url, '_blank');
       return; 
     }
     
-    // Tampilkan di dalam aplikasi (FormFrame) via props onOpenExternalForm
     if (onOpenExternalForm) {
       onOpenExternalForm(url, title);
     }
@@ -140,22 +120,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
           <p className="text-sm text-slate-500 mt-1 font-medium">{userRole === 'KEPALA_SEKOLAH' ? 'Kelola persetujuan dan pantau kinerja.' : 'Pantau status pengajuan Anda.'}</p>
         </div>
         
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           {userRole === 'KEPALA_SEKOLAH' && (
             <button 
               onClick={handleOpenReview}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition shadow-sm font-bold text-xs md:text-sm"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition shadow-sm font-bold text-[10px] md:text-xs"
             >
-              <FileSpreadsheet size={16} /><span>Review Data</span>
+              <FileSpreadsheet size={14} /><span>Review Data</span>
             </button>
           )}
-          {userRole === 'KEPALA_SEKOLAH' && onSyncUsers && (
-            <button onClick={handleSyncClick} disabled={isSyncing} className={`flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-sm font-bold text-xs md:text-sm ${isSyncing ? 'opacity-70 cursor-wait' : ''}`}>
-              <UploadCloud size={16} className={isSyncing ? 'animate-bounce' : ''} /><span>{isSyncing ? 'Syncing...' : 'Sync Pegawai'}</span>
-            </button>
-          )}
-          <div className="flex items-center justify-center gap-2 text-xs md:text-sm text-slate-600 bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm whitespace-nowrap font-medium">
-            <Calendar size={16} className="text-slate-400" /><span>{new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
+          <div className="flex items-center gap-1.5 text-[10px] md:text-xs text-slate-500 bg-white px-3 py-1.5 rounded-lg border border-slate-100 shadow-sm whitespace-nowrap font-medium">
+            <Calendar size={14} className="text-slate-300" /><span>{new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
           </div>
         </div>
       </header>
@@ -254,17 +229,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
                                   onClick={() => handleOpenForm(req)}
                                   className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-indigo-600 text-white text-xs font-bold rounded-lg shadow-sm hover:bg-indigo-700 transition-all animate-fade-in active:scale-95"
                                 >
-                                  {/* Icon berbeda jika tipe Cuti */}
                                   {req.type.includes('Cuti') || req.type === LeaveCategories.CUTI ? (
-                                    <>
-                                        <ExternalLink size={14} />
-                                        <span>Buka Drive</span>
-                                    </>
+                                    <><ExternalLink size={14} /><span>Buka Drive</span></>
                                   ) : (
-                                    <>
-                                        <PenSquare size={14} />
-                                        <span>Isi Form</span>
-                                    </>
+                                    <><PenSquare size={14} /><span>Isi Form</span></>
                                   )}
                                 </button>
                               )}
@@ -282,7 +250,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
             </table>
           </div>
           
-          {/* Tombol Lihat Semua (Hanya muncul jika tidak sedang mencari dan data > 3) */}
           {!searchTerm && requests.length > 3 && (
             <div className="p-3 border-t border-slate-100 bg-slate-50/30 flex justify-center">
                <button 

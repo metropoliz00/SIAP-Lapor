@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { LeaveRequest, User, Status } from '../types';
-import { ArrowLeft, ExternalLink, Search, FileSpreadsheet, Users, FileText, Download, Filter } from 'lucide-react';
-import { SPREADSHEET_URL_VIEW } from '../services/sheetService';
+import { ArrowLeft, Search, FileSpreadsheet, Users, FileText, Download, Filter } from 'lucide-react';
 
 interface DatabaseViewProps {
   requests: LeaveRequest[];
@@ -33,14 +32,6 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({ requests, users, onC
     user.position.toLowerCase().includes(searchTerm)
   );
 
-  const handleOpenOriginalSheet = () => {
-    if (SPREADSHEET_URL_VIEW) {
-      window.open(SPREADSHEET_URL_VIEW, '_blank');
-    } else {
-      alert("Link Spreadsheet belum diset.");
-    }
-  };
-
   const formatDate = (dateString: string) => {
     try {
         return new Date(dateString).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -61,15 +52,6 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({ requests, users, onC
              </h2>
              <p className="text-xs text-slate-500">Rekap data ijin dan data pegawai</p>
           </div>
-        </div>
-
-        <div className="flex items-center gap-2 w-full md:w-auto">
-           <button 
-             onClick={handleOpenOriginalSheet}
-             className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-xs font-bold rounded-lg hover:bg-green-700 transition shadow-sm ml-auto"
-           >
-             <ExternalLink size={14} /> Buka Google Sheet
-           </button>
         </div>
       </div>
 
