@@ -38,6 +38,7 @@ const StatCard = ({ icon: Icon, label, value, colorClass, bgClass }: any) => (
 export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onApprove, onReject, onDelete, onEdit, onSyncUsers }) => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [showAll, setShowAll] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   
   const total = requests.length;
   const approved = requests.filter(r => r.status === Status.APPROVED).length;
@@ -53,13 +54,29 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
     return Object.keys(counts).map((key) => ({ name: key, value: counts[key] })).sort((a, b) => b.value - a.value);
   }, [requests]);
 
-  // Urutkan berdasarkan Tanggal Pembuatan (Terbaru diatas)
-  const sortedRequests = useMemo(() => {
-    return [...requests].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [requests]);
+  // Filter & Sort Logic
+  const displayedRequests = useMemo(() => {
+    // 1. Sort by Date (Newest first)
+    let data = [...requests].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-  // Filter data untuk ditampilkan (3 atau Semua)
-  const displayedRequests = showAll ? sortedRequests : sortedRequests.slice(0, 3);
+    // 2. Filter by Search Term
+    if (searchTerm.trim()) {
+      const lowerTerm = searchTerm.toLowerCase();
+      data = data.filter(req => 
+        req.name.toLowerCase().includes(lowerTerm) ||
+        req.nip.includes(lowerTerm) ||
+        req.type.toLowerCase().includes(lowerTerm) ||
+        req.reason.toLowerCase().includes(lowerTerm)
+      );
+    }
+
+    // 3. Slice logic (Show 3 or All) - Jika sedang search, tampilkan semua hasil match
+    if (!showAll && !searchTerm.trim()) {
+      return data.slice(0, 3);
+    }
+
+    return data;
+  }, [requests, searchTerm, showAll]);
 
   const handleSyncClick = async () => {
     if (onSyncUsers) {
@@ -124,10 +141,26 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col overflow-hidden h-fit">
           <div className="px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between bg-slate-50/50 gap-3">
-            <h3 className="text-base font-bold text-slate-700">Daftar Pengajuan ({showAll ? total : Math.min(3, total)})</h3>
+            <h3 className="text-base font-bold text-slate-700">
+               {searchTerm ? 'Hasil Pencarian' : `Daftar Pengajuan (${showAll ? total : Math.min(3, total)})`}
+            </h3>
             <div className="relative w-full sm:w-auto">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={16} />
-              <input type="text" placeholder="Cari..." className="pl-9 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-500 w-full sm:w-48 transition-all" />
+              <input 
+                type="text" 
+                placeholder="Cari Nama, NIP..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-500 w-full sm:w-56 transition-all" 
+              />
+              {searchTerm && (
+                <button 
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  <X size={14} />
+                </button>
+              )}
             </div>
           </div>
           
@@ -142,7 +175,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {displayedRequests.length === 0 ? (
-                  <tr><td colSpan={3} className="px-5 py-10 text-center text-sm text-slate-400 font-medium">Belum ada data pengajuan.</td></tr>
+                  <tr><td colSpan={3} className="px-5 py-10 text-center text-sm text-slate-400 font-medium">
+                     {searchTerm ? 'Tidak ada data yang cocok dengan pencarian.' : 'Belum ada data pengajuan.'}
+                  </td></tr>
                 ) : (
                   displayedRequests.map((req) => (
                     <tr key={req.id} className="hover:bg-slate-50/80 transition-colors group">
@@ -208,8 +243,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
             </table>
           </div>
           
-          {/* Tombol Lihat Semua */}
-          {requests.length > 3 && (
+          {/* Tombol Lihat Semua (Hanya muncul jika tidak sedang mencari dan data > 3) */}
+          {!searchTerm && requests.length > 3 && (
             <div className="p-3 border-t border-slate-100 bg-slate-50/30 flex justify-center">
                <button 
                   onClick={() => setShowAll(!showAll)}
