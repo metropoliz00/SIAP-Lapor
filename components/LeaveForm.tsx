@@ -199,24 +199,24 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
       </header>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Identitas Diri (Compact Responsive) */}
+        {/* Identitas Diri (Updated to 2 rows grid for better readability) */}
         <div className="bg-slate-50/50 p-4 md:p-5 rounded-xl border border-slate-100">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-0.5">Nama</label>
-              <div className="text-sm md:text-base font-semibold text-slate-800 truncate">{name}</div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">Nama</label>
+              <div className="text-sm md:text-base font-semibold text-slate-800">{name}</div>
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-0.5">NIP</label>
-              <div className="text-sm md:text-base font-mono text-slate-600 truncate">{nip}</div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">NIP</label>
+              <div className="text-sm md:text-base font-mono text-slate-600">{nip}</div>
             </div>
             <div>
-               <label className="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-0.5">Jabatan</label>
-               <div className="text-sm text-slate-700 truncate">{position}</div>
+               <label className="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">Jabatan</label>
+               <div className="text-sm text-slate-700">{position}</div>
             </div>
             <div>
-               <label className="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-0.5">Pangkat</label>
-               <div className="text-sm text-slate-700 font-medium truncate">{rank}</div>
+               <label className="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">Pangkat</label>
+               <div className="text-sm text-slate-700 font-medium">{rank}</div>
             </div>
           </div>
         </div>

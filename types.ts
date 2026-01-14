@@ -78,4 +78,4 @@ export interface LeaveRequest {
   docUrl?: string; // Kolom P (Merged Doc URL)
 }
 
-export type ViewState = 'LOGIN' | 'DASHBOARD' | 'INPUT' | 'PROFILE' | 'USER_MANAGEMENT';
+export type ViewState = 'LOGIN' | 'DASHBOARD' | 'INPUT' | 'PROFILE' | 'USER_MANAGEMENT' | 'FORM_VIEW';

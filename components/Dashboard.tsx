@@ -20,6 +20,7 @@ interface DashboardProps {
   onEdit?: (request: LeaveRequest) => void;
   onSyncUsers?: () => Promise<void>;
   onGeneratePdf?: (request: LeaveRequest) => Promise<void>;
+  onOpenExternalForm?: (url: string, title: string) => void;
 }
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
@@ -35,7 +36,7 @@ const StatCard = ({ icon: Icon, label, value, colorClass, bgClass }: any) => (
   </div>
 );
 
-export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onApprove, onReject, onDelete, onEdit, onSyncUsers }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onApprove, onReject, onDelete, onEdit, onSyncUsers, onOpenExternalForm }) => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -92,14 +93,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
 
   const handleOpenForm = (req: LeaveRequest) => {
     let url = FORM_LINKS.IJIN; 
+    let title = "Formulir Ijin";
+
     if (req.type === LeaveCategories.DISPENSASI_DINAS) {
       url = FORM_LINKS.DISPENSASI_DINAS;
+      title = "Form Dispensasi Dinas";
     } else if (req.type === LeaveCategories.DISPENSASI_PRIBADI) {
       url = FORM_LINKS.DISPENSASI_PRIBADI;
+      title = "Form Dispensasi Pribadi";
     } else if (req.type.includes('Cuti') || req.type === LeaveCategories.CUTI) {
       url = FORM_LINKS.CUTI;
+      title = "Folder Cuti";
     }
-    window.open(url, '_blank');
+    
+    if (onOpenExternalForm) {
+      onOpenExternalForm(url, title);
+    } else {
+      window.open(url, '_blank');
+    }
   };
 
   const formatDate = (dateString: string) => {

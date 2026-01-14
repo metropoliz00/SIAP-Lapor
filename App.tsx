@@ -5,6 +5,7 @@ import { LeaveForm } from './components/LeaveForm';
 import { LoginForm } from './components/LoginForm';
 import { ProfileForm } from './components/ProfileForm';
 import { UserManagement } from './components/UserManagement';
+import { FormFrame } from './components/FormFrame';
 import { 
   syncToSpreadsheet, 
   updateRequestToSheet,
@@ -33,6 +34,11 @@ const App: React.FC = () => {
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [dbError, setDbError] = useState<string>('');
   const [editingRequest, setEditingRequest] = useState<LeaveRequest | null>(null);
+  
+  // External Form State
+  const [activeFormUrl, setActiveFormUrl] = useState('');
+  const [activeFormTitle, setActiveFormTitle] = useState('');
+
   const prevRequestsRef = useRef<LeaveRequest[]>(requests);
 
   const loadData = async () => {
@@ -165,6 +171,12 @@ const App: React.FC = () => {
     }
   };
 
+  const handleOpenExternalForm = (url: string, title: string) => {
+    setActiveFormUrl(url);
+    setActiveFormTitle(title);
+    setView('FORM_VIEW');
+  };
+
   useEffect(() => {
     if (showToast.show) {
       const timer = setTimeout(() => setShowToast({ ...showToast, show: false }), 4000);
@@ -289,11 +301,13 @@ const App: React.FC = () => {
 
         <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 scroll-smooth">
           <div className="max-w-6xl mx-auto animate-fade-in pb-4 min-h-full flex flex-col">
-            <div className="flex justify-end mb-3">
-              <button onClick={loadData} disabled={isLoadingData} className="flex items-center gap-1.5 text-[10px] md:text-xs font-bold text-slate-400 hover:text-brand-600 transition uppercase tracking-wide">
-                <RefreshCw size={12} className={isLoadingData ? 'animate-spin' : ''} /> {isLoadingData ? 'Memuat Data...' : 'Refresh Data'}
-              </button>
-            </div>
+            {view !== 'FORM_VIEW' && (
+               <div className="flex justify-end mb-3">
+                <button onClick={loadData} disabled={isLoadingData} className="flex items-center gap-1.5 text-[10px] md:text-xs font-bold text-slate-400 hover:text-brand-600 transition uppercase tracking-wide">
+                    <RefreshCw size={12} className={isLoadingData ? 'animate-spin' : ''} /> {isLoadingData ? 'Memuat Data...' : 'Refresh Data'}
+                </button>
+              </div>
+            )}
 
             <div className="flex-1">
               {view === 'DASHBOARD' ? (
@@ -306,11 +320,14 @@ const App: React.FC = () => {
                   onEdit={handleEditRequest}
                   onSyncUsers={handleSyncUsers}
                   onGeneratePdf={handleGeneratePdf}
+                  onOpenExternalForm={handleOpenExternalForm}
                 />
               ) : view === 'USER_MANAGEMENT' && currentUser.role === 'KEPALA_SEKOLAH' ? (
                 <UserManagement users={users} onUpdateUser={handleUpdateUserDatabase} onAddUser={handleAddUser} onSyncUsers={handleSyncUsers} />
               ) : view === 'PROFILE' ? (
                 <ProfileForm user={currentUser} onSave={handleUpdateProfile} onCancel={() => setView('DASHBOARD')} />
+              ) : view === 'FORM_VIEW' ? (
+                <FormFrame url={activeFormUrl} title={activeFormTitle} onClose={() => setView('DASHBOARD')} />
               ) : (
                 <LeaveForm 
                   currentUser={currentUser} 
