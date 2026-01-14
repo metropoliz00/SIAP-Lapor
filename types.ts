@@ -24,6 +24,24 @@ export const CutiTypes = {
   LAINNYA: 'Lainnya / Input Sendiri'
 };
 
+// Pilihan Alasan
+export const ReasonOptions = {
+  DISPENSASI_PRIBADI: [
+    'Mesin finger print tidak berfungsi/data jari tidak terbaca',
+    'Lupa finger print',
+    'Keperluan keluarga',
+    'Alasan lainnya'
+  ],
+  DISPENSASI_DINAS: [
+    'Mengikuti Upacara PHBN/Upacara lainnya',
+    'Mengikuti Pengajian/Peringatan Hari Besar Keagamaan',
+    'Koordinasi dengan OPD terkait lainnya',
+    'Menghadiri rapat dinas',
+    'Mengikuti pengarahan/briefing dari Pimpinan',
+    'Alasan kedinasan lainnya'
+  ]
+};
+
 // Link Google Form & Drive
 export const FORM_LINKS = {
   DISPENSASI_PRIBADI: 'https://docs.google.com/forms/d/e/1FAIpQLScMGl22gmgAXjBg_dMB30rXaTVGZLbpQiiWXyJdVtJ1RB__0g/viewform',

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { LeaveRequest, Status, User, LeaveCategories, CutiTypes } from '../types';
-import { Send, Calendar } from 'lucide-react';
+import { LeaveRequest, Status, User, LeaveCategories, CutiTypes, ReasonOptions } from '../types';
+import { Send, Calendar, CheckCircle2 } from 'lucide-react';
 
 interface LeaveFormProps {
   currentUser: User;
@@ -21,11 +21,14 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
   const [selectedCutiType, setSelectedCutiType] = useState<string>(CutiTypes.TAHUNAN);
   const [customCutiInput, setCustomCutiInput] = useState<string>('');
 
+  // State for Reasons
+  const [selectedReasonOption, setSelectedReasonOption] = useState<string>(''); // Untuk radio button
+  const [customReasonText, setCustomReasonText] = useState<string>(''); // Untuk text area (Lainnya atau manual)
+
   const [startDate, setStartDate] = useState('');
   const [startTime, setStartTime] = useState('07:00');
   const [endDate, setEndDate] = useState('');
   const [endTime, setEndTime] = useState('14:00');
-  const [reason, setReason] = useState('');
   
   // Bug fix: Preserve existing ID and DocURL
   const [existingId, setExistingId] = useState<string | null>(null);
@@ -43,27 +46,60 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
       setEndDate(initialData.endDate.split('T')[0]);
       setStartTime(initialData.startTime);
       setEndTime(initialData.endTime);
-      setReason(initialData.reason);
-
+      
       // Parse Type
       const type = initialData.type;
       const categories = Object.values(LeaveCategories);
       
+      let detectedCategory = LeaveCategories.DISPENSASI_DINAS; // Default fallback
+
       if (type.startsWith("Cuti:")) {
-        setMainCategory(LeaveCategories.CUTI);
+        detectedCategory = LeaveCategories.CUTI;
         setSelectedCutiType(CutiTypes.LAINNYA);
         setCustomCutiInput(type.replace("Cuti: ", ""));
       } else if (Object.values(CutiTypes).includes(type)) {
-        setMainCategory(LeaveCategories.CUTI);
+        detectedCategory = LeaveCategories.CUTI;
         setSelectedCutiType(type);
       } else if (categories.includes(type)) {
-        setMainCategory(type);
-      } else {
-         // Fallback default
-         setMainCategory(LeaveCategories.DISPENSASI_DINAS);
+        detectedCategory = type;
       }
+      
+      setMainCategory(detectedCategory);
+
+      // Parse Reason logic
+      const savedReason = initialData.reason;
+      
+      if (detectedCategory === LeaveCategories.DISPENSASI_PRIBADI) {
+        const options = ReasonOptions.DISPENSASI_PRIBADI;
+        if (options.includes(savedReason) && savedReason !== 'Alasan lainnya') {
+            setSelectedReasonOption(savedReason);
+        } else {
+            setSelectedReasonOption('Alasan lainnya');
+            setCustomReasonText(savedReason);
+        }
+      } else if (detectedCategory === LeaveCategories.DISPENSASI_DINAS) {
+        const options = ReasonOptions.DISPENSASI_DINAS;
+        if (options.includes(savedReason) && savedReason !== 'Alasan kedinasan lainnya') {
+             setSelectedReasonOption(savedReason);
+        } else {
+             setSelectedReasonOption('Alasan kedinasan lainnya');
+             setCustomReasonText(savedReason);
+        }
+      } else {
+        // Untuk Cuti dan Ijin biasa, langsung masukkan ke custom text
+        setCustomReasonText(savedReason);
+      }
+
     }
   }, [initialData]);
+
+  // Reset reason when category changes (if not editing or user changed manually)
+  useEffect(() => {
+    if (!initialData) {
+       setSelectedReasonOption('');
+       setCustomReasonText('');
+    }
+  }, [mainCategory]);
 
   // Auto-set endDate to startDate when startDate changes if endDate is empty or new
   useEffect(() => {
@@ -74,7 +110,7 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !nip || !startDate || !reason) return;
+    if (!name || !nip || !startDate) return;
 
     // Determine final Type string
     let finalType = mainCategory;
@@ -90,6 +126,50 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
       }
     }
 
+    // Determine final Reason string
+    let finalReason = '';
+    
+    // Logic untuk Dispensasi Pribadi
+    if (mainCategory === LeaveCategories.DISPENSASI_PRIBADI) {
+        if (!selectedReasonOption) {
+            alert("Pilih alasan dispensasi!");
+            return;
+        }
+        if (selectedReasonOption === 'Alasan lainnya') {
+            if (!customReasonText.trim()) {
+                alert("Tuliskan detail alasan lainnya!");
+                return;
+            }
+            finalReason = customReasonText;
+        } else {
+            finalReason = selectedReasonOption;
+        }
+    } 
+    // Logic untuk Dispensasi Dinas
+    else if (mainCategory === LeaveCategories.DISPENSASI_DINAS) {
+        if (!selectedReasonOption) {
+            alert("Pilih alasan dispensasi dinas!");
+            return;
+        }
+        if (selectedReasonOption === 'Alasan kedinasan lainnya') {
+            if (!customReasonText.trim()) {
+                alert("Tuliskan detail alasan dinas lainnya!");
+                return;
+            }
+            finalReason = customReasonText;
+        } else {
+            finalReason = selectedReasonOption;
+        }
+    }
+    // Logic untuk Ijin / Cuti (Manual Text)
+    else {
+        if (!customReasonText.trim()) {
+            alert("Isi alasan!");
+            return;
+        }
+        finalReason = customReasonText;
+    }
+
     const newRequest: LeaveRequest = {
       id: existingId || Math.random().toString(36).substr(2, 9),
       name,
@@ -102,7 +182,7 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
       endDate: endDate || startDate,
       startTime,
       endTime,
-      reason,
+      reason: finalReason,
       status: Status.PENDING, // Reset status to PENDING on edit to re-trigger approval
       createdAt: existingCreatedAt || new Date().toISOString(),
       docUrl: existingDocUrl // Keep the doc url if it exists
@@ -162,7 +242,12 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
                         name="mainCategory" 
                         value={cat} 
                         checked={mainCategory === cat}
-                        onChange={(e) => setMainCategory(e.target.value)}
+                        onChange={(e) => {
+                            setMainCategory(e.target.value);
+                            // Reset related states
+                            setSelectedReasonOption('');
+                            setCustomReasonText('');
+                        }}
                         className="hidden"
                       />
                       {cat}
@@ -257,17 +342,64 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
             </div>
         </div>
 
-        {/* Alasan */}
-        <div>
+        {/* ALASAN SECTION (Dynamic) */}
+        <div className="animate-fade-in">
           <label className="block text-xs font-bold text-slate-700 mb-1.5">Alasan Detail</label>
-          <textarea
-            required
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            rows={3}
-            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-500 outline-none text-sm text-slate-700"
-            placeholder="Tuliskan keterangan tambahan..."
-          />
+
+          {/* Logic Pilihan untuk Dispensasi Pribadi */}
+          {mainCategory === LeaveCategories.DISPENSASI_PRIBADI && (
+             <div className="space-y-2 mb-2">
+               {ReasonOptions.DISPENSASI_PRIBADI.map((opt) => (
+                  <label key={opt} className={`flex items-start gap-2 p-2 rounded-lg border cursor-pointer transition-all ${selectedReasonOption === opt ? 'bg-brand-50 border-brand-200' : 'bg-white border-slate-200 hover:bg-slate-50'}`}>
+                      <input 
+                         type="radio" 
+                         name="reasonOption" 
+                         value={opt} 
+                         checked={selectedReasonOption === opt} 
+                         onChange={(e) => setSelectedReasonOption(e.target.value)}
+                         className="mt-0.5"
+                      />
+                      <span className="text-xs text-slate-700">{opt}</span>
+                  </label>
+               ))}
+             </div>
+          )}
+
+          {/* Logic Pilihan untuk Dispensasi Dinas */}
+          {mainCategory === LeaveCategories.DISPENSASI_DINAS && (
+             <div className="space-y-2 mb-2">
+               {ReasonOptions.DISPENSASI_DINAS.map((opt) => (
+                  <label key={opt} className={`flex items-start gap-2 p-2 rounded-lg border cursor-pointer transition-all ${selectedReasonOption === opt ? 'bg-brand-50 border-brand-200' : 'bg-white border-slate-200 hover:bg-slate-50'}`}>
+                      <input 
+                         type="radio" 
+                         name="reasonOption" 
+                         value={opt} 
+                         checked={selectedReasonOption === opt} 
+                         onChange={(e) => setSelectedReasonOption(e.target.value)}
+                         className="mt-0.5"
+                      />
+                      <span className="text-xs text-slate-700">{opt}</span>
+                  </label>
+               ))}
+             </div>
+          )}
+
+          {/* Manual Text Area: Muncul jika kategori lain, atau jika pilih opsi 'Lainnya' */}
+          {(
+             mainCategory === LeaveCategories.IJIN || 
+             mainCategory === LeaveCategories.CUTI || 
+             (mainCategory === LeaveCategories.DISPENSASI_PRIBADI && selectedReasonOption === 'Alasan lainnya') ||
+             (mainCategory === LeaveCategories.DISPENSASI_DINAS && selectedReasonOption === 'Alasan kedinasan lainnya')
+           ) && (
+              <textarea
+                required
+                value={customReasonText}
+                onChange={(e) => setCustomReasonText(e.target.value)}
+                rows={3}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-500 outline-none text-sm text-slate-700 animate-fade-in"
+                placeholder={mainCategory.includes('Dispensasi') ? "Tuliskan detail alasan..." : "Tuliskan keterangan ijin/cuti..."}
+              />
+          )}
         </div>
 
         <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
