@@ -5,11 +5,11 @@ import { LeaveRequest, User, Status } from '../types';
 // =========================================================================================
 // 1. Deploy Apps Script (lihat APPS_SCRIPT_GUIDE.md)
 // 2. Copy 'Web App URL' dan paste di bawah ini:
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxNezfMOl02uGMEcek_km9KwMpC1x9UeDzG1BNiOp7cXfbZ1roPv6MZ7gWvbPni3Q5Vtg/exec'; 
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwtynRRjRqr3UsQL01BcrvchF8slzetbwBMQF4mXS-JVMZj9jEZZ7Z8nAbB4Nf-4YD_A/exec'; 
 
 // 3. Masukkan Link Spreadsheet (Mode View/Edit) untuk menu Review di dalam aplikasi
 // Ganti URL di bawah ini dengan URL Google Sheet Anda.
-export const SPREADSHEET_URL_VIEW = 'https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/edit?usp=sharing'; 
+export const SPREADSHEET_URL_VIEW = 'https://docs.google.com/spreadsheets/d/1Bsi96hXYUegqdlxQhQ92ncl5g01Eoy6pIlo5sisvEVA/edit?usp=sharing'; 
 
 // =========================================================================================
 // DATA MOCK / DUMMY
