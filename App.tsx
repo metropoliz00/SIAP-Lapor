@@ -249,7 +249,7 @@ const App: React.FC = () => {
 
             <div className="flex flex-col items-center gap-4">
                <Loader2 size={32} className="text-brand-600 animate-spin" />
-               <p className="text-[10px] font-bold text-slate-400 animate-pulse tracking-wide">LOADING SYSTEM...</p>
+               <p className="text-[10px] font-bold text-slate-400 animate-pulse tracking-wide">Loading System..</p>
             </div>
          </div>
          
@@ -313,7 +313,7 @@ const App: React.FC = () => {
                 <div className="flex items-center gap-3 overflow-hidden">
                   <div className="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center text-brand-700 text-sm font-bold shadow-sm ring-1 ring-slate-100">{currentUser.name.charAt(0)}</div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-slate-800 truncate">{currentUser.name}</p>
+                    <p className="text-[10px] font-bold text-slate-800 truncate">{currentUser.name}</p>
                     <p className="text-[11px] text-slate-500 font-mono truncate">{currentUser.nip}</p>
                   </div>
                 </div>
@@ -335,8 +335,9 @@ const App: React.FC = () => {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 scroll-smooth">
-          <div className="max-w-6xl mx-auto animate-fade-in pb-4 min-h-full flex flex-col">
+        {/* Updated Container with adjusted padding and max-width for precision */}
+        <div className="flex-1 overflow-y-auto p-3 md:p-6 lg:p-8 scroll-smooth">
+          <div className="max-w-7xl mx-auto animate-fade-in pb-4 min-h-full flex flex-col">
             {view !== 'FORM_VIEW' && view !== 'DATABASE' && (
                <div className="flex justify-end mb-3">
                 <button onClick={loadData} disabled={isLoadingData} className="flex items-center gap-1.5 text-[10px] md:text-xs font-bold text-slate-400 hover:text-brand-600 transition uppercase tracking-wide">
