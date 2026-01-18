@@ -78,7 +78,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ user, onSave, onCancel
                       type="text"
                       value={rank}
                       onChange={(e) => setRank(e.target.value)}
-                      placeholder="Contoh: Penata Muda / III a"
+                      placeholder="Pangkat/Gol"
                       className="w-full pl-8 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-500 text-sm"
                     />
                   </div>
@@ -92,9 +92,9 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ user, onSave, onCancel
                </div>
 
                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">NIP (Username)</label>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">NIP</label>
                   <div className="relative group">
-                     <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">#</span>
+                     <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs"></span>
                      <input
                       type="text"
                       value={user.nip}

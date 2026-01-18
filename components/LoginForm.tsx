@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { User } from '../types';
-import { Lock, User as UserIcon, LogIn, AlertCircle, ServerCrash, ChevronRight } from 'lucide-react';
+import { Lock, User as UserIcon, LogIn, AlertCircle, ServerCrash, Eye, EyeOff } from 'lucide-react';
 
 interface LoginFormProps {
   users: User[];
@@ -11,6 +11,7 @@ interface LoginFormProps {
 export const LoginForm: React.FC<LoginFormProps> = ({ users, onLogin, dbError }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -80,7 +81,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ users, onLogin, dbError })
             <h1 className="text-3xl font-black text-slate-800 tracking-tight mb-2">
               SIAP <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-sky-500">Lapor</span>
             </h1>
-            <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Sistem Ijin Agenda Pegawai</p>
+            <p className="text-slate-500 text-s font-bold uppercase tracking-widest mb-1">Sistem Ijin Agenda Pegawai</p>
              <div className="inline-block px-3 py-1 rounded-full bg-blue-50 border border-blue-100 mt-2">
                 <p className="text-blue-600 text-[11px] font-extrabold tracking-wider uppercase">UPT SD Negeri Remen 2</p>
              </div>
@@ -107,7 +108,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ users, onLogin, dbError })
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1">Username / NIP</label>
+              <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1">Username</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <UserIcon className="text-slate-400 group-focus-within:text-brand-500 transition-colors duration-300" size={20} />
@@ -117,7 +118,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ users, onLogin, dbError })
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full pl-11 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-[3px] focus:ring-brand-100 focus:border-brand-500 outline-none transition-all duration-300 text-sm font-semibold text-slate-700 placeholder:text-slate-300 shadow-inner group-hover:bg-white"
-                  placeholder="Masukkan Username"
+                  placeholder="Username"
                   required
                   disabled={!!dbError || isLoading}
                 />
@@ -131,14 +132,22 @@ export const LoginForm: React.FC<LoginFormProps> = ({ users, onLogin, dbError })
                   <Lock className="text-slate-400 group-focus-within:text-brand-500 transition-colors duration-300" size={20} />
                 </div>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-[3px] focus:ring-brand-100 focus:border-brand-500 outline-none transition-all duration-300 text-sm font-semibold text-slate-700 placeholder:text-slate-300 shadow-inner group-hover:bg-white"
-                  placeholder="Masukkan Password"
+                  className="w-full pl-11 pr-12 py-3.5 bg-slate-50/50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-[3px] focus:ring-brand-100 focus:border-brand-500 outline-none transition-all duration-300 text-sm font-semibold text-slate-700 placeholder:text-slate-300 shadow-inner group-hover:bg-white"
+                  placeholder="Password"
                   required
                   disabled={!!dbError || isLoading}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-brand-600 transition-colors focus:outline-none"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
               </div>
             </div>
 
@@ -171,7 +180,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ users, onLogin, dbError })
              <div className="flex items-center justify-center gap-2 text-xs text-slate-400 font-medium">
                <span>&copy; 2026</span>
                <div className="w-1 h-1 bg-slate-300 rounded-full"></div>
-               <span>UPT SD Negeri Remen 2</span>
+               <span>Dev. Dedy Meyga Saputra, S.Pd, M.Pd</span>
              </div>
           </div>
         </div>
