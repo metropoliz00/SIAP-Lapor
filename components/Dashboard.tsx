@@ -252,16 +252,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
                                </>
                              ) : (
                                <>
-                                 <button onClick={() => handleOpenForm(req)} className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors" title="Lihat Form"><ExternalLink size={14} /></button>
                                  {req.status === Status.APPROVED && (
-                                     <button onClick={() => onGeneratePdf && onGeneratePdf(req)} className="p-1.5 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition-colors" title="Download PDF"><FileText size={14} /></button>
+                                    <button onClick={() => handleOpenForm(req)} className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors" title="Lihat Form"><ExternalLink size={14} /></button>
                                  )}
                                </>
                              )}
                              {onEdit && req.status === Status.PENDING && userRole === 'GURU' && (
                                 <button onClick={() => onEdit(req)} className="p-1.5 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition-colors" title="Edit"><Edit size={14} /></button>
                              )}
-                             {onDelete && (
+                             {onDelete && userRole === 'KEPALA_SEKOLAH' && (
                                 <button onClick={() => handleDeleteClick(req.id, req.name)} className="p-1.5 bg-slate-100 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus"><Trash2 size={14} /></button>
                              )}
                            </div>
