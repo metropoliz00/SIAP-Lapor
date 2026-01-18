@@ -245,21 +245,25 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
 
                            {/* Action Buttons */}
                            <div className="flex items-center gap-1 mt-1">
-                             {userRole === 'KEPALA_SEKOLAH' && req.status === Status.PENDING ? (
+                             {/* Approval Buttons (KS Only, Pending Only) */}
+                             {userRole === 'KEPALA_SEKOLAH' && req.status === Status.PENDING && (
                                <>
                                  <button onClick={() => onApprove(req.id)} className="p-1.5 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 hover:scale-105 transition-all" title="Setujui"><Check size={14} /></button>
                                  <button onClick={() => onReject(req.id)} className="p-1.5 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 hover:scale-105 transition-all" title="Tolak"><X size={14} /></button>
                                </>
-                             ) : (
-                               <>
-                                 {req.status === Status.APPROVED && (
-                                    <button onClick={() => handleOpenForm(req)} className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors" title="Lihat Form"><ExternalLink size={14} /></button>
-                                 )}
-                               </>
                              )}
+
+                             {/* Lihat Form Button - Muncul jika Status DISATUJUI (APPROVED) */}
+                             {req.status === Status.APPROVED && (
+                                 <button onClick={() => handleOpenForm(req)} className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors" title="Lihat Form"><ExternalLink size={14} /></button>
+                             )}
+
+                             {/* Edit Button - Muncul jika Status PENDING dan Role GURU (Otomatis hilang jika Disetujui/Ditolak) */}
                              {onEdit && req.status === Status.PENDING && userRole === 'GURU' && (
                                 <button onClick={() => onEdit(req)} className="p-1.5 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition-colors" title="Edit"><Edit size={14} /></button>
                              )}
+                             
+                             {/* Delete Button (KS Only) */}
                              {onDelete && userRole === 'KEPALA_SEKOLAH' && (
                                 <button onClick={() => handleDeleteClick(req.id, req.name)} className="p-1.5 bg-slate-100 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus"><Trash2 size={14} /></button>
                              )}
