@@ -99,9 +99,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
     } else if (req.type === LeaveCategories.IJIN) {
       url = FORM_LINKS.IJIN;
       title = "Formulir Ijin";
-    } else if (req.type === LeaveCategories.MENINGGALKAN_TUGAS) {
-      url = FORM_LINKS.MENINGGALKAN_TUGAS || FORM_LINKS.IJIN;
-      title = "Formulir Ijin Meninggalkan Tugas";
     } else if (req.type.includes('Cuti') || req.type === LeaveCategories.CUTI) {
       url = FORM_LINKS.CUTI;
       title = "Folder Cuti";

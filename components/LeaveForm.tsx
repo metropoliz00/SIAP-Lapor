@@ -382,7 +382,6 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
           {(
              mainCategory === LeaveCategories.IJIN || 
              mainCategory === LeaveCategories.CUTI || 
-             mainCategory === LeaveCategories.MENINGGALKAN_TUGAS ||
              (mainCategory === LeaveCategories.DISPENSASI_PRIBADI && selectedReasonOption === 'Alasan lainnya') ||
              (mainCategory === LeaveCategories.DISPENSASI_DINAS && selectedReasonOption === 'Alasan kedinasan lainnya')
            ) && (

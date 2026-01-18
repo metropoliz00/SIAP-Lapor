@@ -13,8 +13,7 @@ export const LeaveCategories = {
   DISPENSASI_DINAS: 'Dispensasi Dinas',
   DISPENSASI_PRIBADI: 'Dispensasi Pribadi',
   IJIN: 'Ijin',
-  CUTI: 'Cuti',
-  MENINGGALKAN_TUGAS: 'Ijin Meninggalkan Tugas'
+  CUTI: 'Cuti'
 };
 
 export const CutiTypes = {
@@ -48,8 +47,7 @@ export const FORM_LINKS = {
   DISPENSASI_PRIBADI: 'https://docs.google.com/forms/d/e/1FAIpQLScMGl22gmgAXjBg_dMB30rXaTVGZLbpQiiWXyJdVtJ1RB__0g/viewform?embedded=true',
   DISPENSASI_DINAS: 'https://docs.google.com/forms/d/e/1FAIpQLSfsQHG4r8RASmnxieutoZINa9qRDWUwlNQPljj_CWnDOEF8PA/viewform?embedded=true',
   IJIN: 'https://docs.google.com/forms/d/e/1FAIpQLSeTMY4LVGQwAHIOmOy0eXqy3ESxMLly1vWRvnLdo9LoXz8sKA/viewform?embedded=true',
-  CUTI: 'https://drive.google.com/embeddedfolderview?id=1_sSTcWwbD6fEdKPo_6raLIjLm-oaIyvd#list',
-  MENINGGALKAN_TUGAS: 'https://docs.google.com/forms/d/e/1FAIpQLSeTMY4LVGQwAHIOmOy0eXqy3ESxMLly1vWRvnLdo9LoXz8sKA/viewform?embedded=true'
+  CUTI: 'https://drive.google.com/embeddedfolderview?id=1_sSTcWwbD6fEdKPo_6raLIjLm-oaIyvd#list'
 };
 
 export interface User {
