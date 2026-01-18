@@ -99,6 +99,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
     } else if (req.type === LeaveCategories.IJIN) {
       url = FORM_LINKS.IJIN;
       title = "Formulir Ijin";
+    } else if (req.type === LeaveCategories.MENINGGALKAN_TUGAS) {
+      url = FORM_LINKS.MENINGGALKAN_TUGAS || FORM_LINKS.IJIN;
+      title = "Formulir Ijin Meninggalkan Tugas";
     } else if (req.type.includes('Cuti') || req.type === LeaveCategories.CUTI) {
       url = FORM_LINKS.CUTI;
       title = "Folder Cuti";
@@ -225,108 +228,4 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
                           <div className="flex items-center gap-2 text-[11px] text-slate-500 font-mono">
                                 <Clock size={12} className="text-orange-400" /><span className="font-medium bg-orange-50 px-1.5 rounded text-orange-700">{req.startTime} - {req.endTime}</span>
                           </div>
-                          <p className="text-xs text-slate-600 leading-snug italic line-clamp-2 mt-1 pl-2 border-l-2 border-slate-200">"{req.reason}"</p>
-                        </div>
-                      </td>
-                      <td className="px-5 py-4 align-top text-center w-[20%]">
-                        <div className="flex flex-col items-center gap-2 w-full pt-1">
-                          {req.status === Status.PENDING ? (
-                            userRole === 'KEPALA_SEKOLAH' ? (
-                              <div className="flex items-center justify-center gap-2 w-full">
-                                <button onClick={() => onApprove(req.id)} className="p-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 hover:scale-110 transition shadow-sm" title="Setujui"><Check size={16} /></button>
-                                <button onClick={() => onReject(req.id)} className="p-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 hover:scale-110 transition shadow-sm" title="Tolak"><X size={16} /></button>
-                              </div>
-                            ) : (
-                              <div className="flex flex-col items-center gap-2 w-full">
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-yellow-100 text-yellow-800 border border-yellow-200 shadow-sm animate-pulse">Menunggu</span>
-                                {onEdit && <button onClick={() => onEdit(req)} className="text-[10px] font-bold text-slate-400 hover:text-brand-600 flex items-center gap-1 transition-colors" title="Edit"><Edit size={12} /> Edit</button>}
-                              </div>
-                            )
-                          ) : (
-                            <div className="w-full flex flex-col gap-2">
-                              <span className={`inline-flex items-center justify-center w-full px-2 py-1 rounded-full text-[10px] font-bold border shadow-sm ${req.status === Status.APPROVED ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>{req.status}</span>
-                              
-                              {req.status === Status.APPROVED && (
-                                <button 
-                                  onClick={() => handleOpenForm(req)}
-                                  className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white text-[10px] font-bold rounded-lg shadow-md shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95"
-                                >
-                                  {req.type.includes('Cuti') || req.type === LeaveCategories.CUTI ? (
-                                    <><ExternalLink size={12} /><span>Drive</span></>
-                                  ) : (
-                                    <><PenSquare size={12} /><span>Form</span></>
-                                  )}
-                                </button>
-                              )}
-                            </div>
-                          )}
-                          {(onDelete && (userRole === 'KEPALA_SEKOLAH' || req.status !== Status.APPROVED)) && (
-                            <button onClick={() => handleDeleteClick(req.id, req.name)} className="text-slate-300 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition mt-1 opacity-0 group-hover:opacity-100"><Trash2 size={14} /></button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-          
-          {!searchTerm && requests.length > 3 && (
-            <div className="p-3 border-t border-slate-100 bg-slate-50/50 flex justify-center backdrop-blur-sm">
-               <button 
-                  onClick={() => setShowAll(!showAll)}
-                  className="flex items-center gap-1.5 px-5 py-2 text-[11px] font-bold text-brand-600 hover:text-brand-700 hover:bg-brand-50 rounded-full transition-all border border-transparent hover:border-brand-200"
-               >
-                  <span>{showAll ? 'Tutup Tampilan' : 'Lihat Selengkapnya'}</span>
-                  {showAll ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-               </button>
-            </div>
-          )}
-        </div>
-
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-bold text-slate-700">Statistik Ijin</h3>
-            <div className="p-1.5 bg-slate-100 rounded-lg text-slate-500">
-               <TrendingUp size={16} />
-            </div>
-          </div>
-          {/* INCREASED HEIGHT to h-80 to fit diagram + legend without cutting off */}
-          <div className="h-80 w-full relative">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie 
-                  data={typeData} 
-                  cx="50%" 
-                  cy="50%" // Centered vertically
-                  innerRadius={50} // Optimized radius
-                  outerRadius={75} // Optimized radius
-                  fill="#8884d8" 
-                  paddingAngle={5} 
-                  dataKey="value"
-                  strokeWidth={2}
-                  stroke="#fff"
-                >
-                  {typeData.map((_, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
-                </Pie>
-                <Tooltip contentStyle={{ borderRadius: '12px', fontSize: '12px', padding: '10px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontWeight: 'bold' }} />
-                <Legend 
-                  verticalAlign="bottom" 
-                  height={80} 
-                  align="center"
-                  iconType="circle"
-                  iconSize={8}
-                  wrapperStyle={{fontSize: '11px', width: '100%', paddingTop: '5px', fontWeight: 600, color: '#64748b'}} 
-                />
-              </PieChart>
-            </ResponsiveContainer>
-            {typeData.length === 0 && (
-               <div className="absolute inset-0 flex items-center justify-center text-xs text-slate-400 font-medium">Belum ada data</div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+                          <p className="text
