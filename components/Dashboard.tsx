@@ -38,7 +38,7 @@ const StatCard = ({ icon: Icon, label, value, colorClass, bgClass }: any) => (
   </div>
 );
 
-export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onApprove, onReject, onDelete, onEdit, onSyncUsers, onOpenExternalForm, onOpenDatabase }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onApprove, onReject, onDelete, onEdit, onSyncUsers, onGeneratePdf, onOpenExternalForm, onOpenDatabase }) => {
   const [showAll, setShowAll] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -123,7 +123,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+    try {
+      return new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+    } catch (e) {
+      return dateString;
+    }
   };
 
   return (
@@ -228,4 +232,106 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
                           <div className="flex items-center gap-2 text-[11px] text-slate-500 font-mono">
                                 <Clock size={12} className="text-orange-400" /><span className="font-medium bg-orange-50 px-1.5 rounded text-orange-700">{req.startTime} - {req.endTime}</span>
                           </div>
-                          <p className="text
+                          <p className="text-xs text-slate-500 line-clamp-2 mt-1 italic">"{req.reason}"</p>
+                        </div>
+                      </td>
+                      <td className="px-5 py-4 align-top text-center">
+                        <div className="flex flex-col gap-2 items-center">
+                           {/* Status Badge */}
+                           <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase border shadow-sm ${
+                              req.status === Status.APPROVED ? 'bg-green-50 text-green-700 border-green-200' :
+                              req.status === Status.REJECTED ? 'bg-red-50 text-red-700 border-red-200' :
+                              'bg-yellow-50 text-yellow-700 border-yellow-200'
+                           }`}>
+                             {req.status}
+                           </span>
+
+                           {/* Action Buttons */}
+                           <div className="flex items-center gap-1 mt-1">
+                             {userRole === 'KEPALA_SEKOLAH' && req.status === Status.PENDING ? (
+                               <>
+                                 <button onClick={() => onApprove(req.id)} className="p-1.5 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 hover:scale-105 transition-all" title="Setujui"><Check size={14} /></button>
+                                 <button onClick={() => onReject(req.id)} className="p-1.5 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 hover:scale-105 transition-all" title="Tolak"><X size={14} /></button>
+                               </>
+                             ) : (
+                               <>
+                                 <button onClick={() => handleOpenForm(req)} className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors" title="Lihat Form"><ExternalLink size={14} /></button>
+                                 {req.status === Status.APPROVED && (
+                                     <button onClick={() => onGeneratePdf && onGeneratePdf(req)} className="p-1.5 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition-colors" title="Download PDF"><FileText size={14} /></button>
+                                 )}
+                               </>
+                             )}
+                             {onEdit && req.status === Status.PENDING && userRole === 'GURU' && (
+                                <button onClick={() => onEdit(req)} className="p-1.5 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition-colors" title="Edit"><Edit size={14} /></button>
+                             )}
+                             {onDelete && (
+                                <button onClick={() => handleDeleteClick(req.id, req.name)} className="p-1.5 bg-slate-100 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus"><Trash2 size={14} /></button>
+                             )}
+                           </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Charts Section */}
+        <div className="space-y-6">
+           <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 animate-fade-in hover:shadow-md transition-shadow">
+              <h3 className="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">
+                 <div className="w-1 h-4 bg-purple-500 rounded-full"></div>
+                 Statistik Ijin
+              </h3>
+              <div className="h-48 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={typeData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={40}
+                      outerRadius={60}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {typeData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                    <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', paddingTop: '10px' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+           </div>
+           
+           <div className="bg-gradient-to-br from-brand-600 to-indigo-700 p-5 rounded-2xl shadow-lg text-white relative overflow-hidden group">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-2xl group-hover:bg-white/20 transition-all duration-700"></div>
+               <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/30 rounded-full -ml-5 -mb-5 blur-xl"></div>
+               
+               <div className="relative z-10">
+                   <h3 className="text-sm font-bold mb-1 flex items-center gap-2">
+                      <TrendingUp size={16} /> Status Kinerja
+                   </h3>
+                   <p className="text-indigo-100 text-xs mb-4">Ringkasan aktivitas bulan ini</p>
+                   
+                   <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-white/10 backdrop-blur-sm p-3 rounded-xl border border-white/10">
+                         <span className="block text-2xl font-black">{approved}</span>
+                         <span className="text-[10px] text-indigo-100 uppercase tracking-wide">Disetujui</span>
+                      </div>
+                      <div className="bg-white/10 backdrop-blur-sm p-3 rounded-xl border border-white/10">
+                         <span className="block text-2xl font-black">{total}</span>
+                         <span className="text-[10px] text-indigo-100 uppercase tracking-wide">Total</span>
+                      </div>
+                   </div>
+               </div>
+           </div>
+        </div>
+      </div>
+    </div>
+  );
+};

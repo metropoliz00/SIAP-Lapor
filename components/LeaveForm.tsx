@@ -228,11 +228,11 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
             <div className="lg:col-span-2 space-y-3 p-4 border border-brand-100 bg-brand-50/30 rounded-xl">
                 <label className="block text-sm font-bold text-slate-800">Kategori Ijin</label>
                 
-                {/* Main Category Selection (Radio Style Cards) */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {/* Main Category Selection (Flex Wrap) */}
+                <div className="flex flex-wrap gap-2">
                   {Object.values(LeaveCategories).map((cat) => (
                     <label key={cat} 
-                      className={`cursor-pointer border rounded-lg p-3 min-h-[3rem] flex items-center justify-center text-xs md:text-sm font-medium transition-all text-center h-full active:scale-95 select-none
+                      className={`cursor-pointer border rounded-lg p-3 flex-1 min-w-[140px] flex items-center justify-center text-xs md:text-sm font-medium transition-all text-center active:scale-95 select-none
                       ${mainCategory === cat 
                         ? 'bg-brand-600 text-white border-brand-600 shadow-md ring-2 ring-brand-200 ring-offset-1' 
                         : 'bg-white text-slate-600 border-slate-200 hover:border-brand-300 hover:bg-slate-50'}`}
@@ -382,6 +382,7 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
           {(
              mainCategory === LeaveCategories.IJIN || 
              mainCategory === LeaveCategories.CUTI || 
+             mainCategory === LeaveCategories.MENINGGALKAN_TUGAS ||
              (mainCategory === LeaveCategories.DISPENSASI_PRIBADI && selectedReasonOption === 'Alasan lainnya') ||
              (mainCategory === LeaveCategories.DISPENSASI_DINAS && selectedReasonOption === 'Alasan kedinasan lainnya')
            ) && (
@@ -391,7 +392,7 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
                 onChange={(e) => setCustomReasonText(e.target.value)}
                 rows={4}
                 className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-sm text-slate-700 animate-fade-in shadow-sm placeholder:text-slate-400"
-                placeholder={mainCategory.includes('Dispensasi') ? "Tuliskan detail alasan..." : "Tuliskan keterangan ijin/cuti..."}
+                placeholder={mainCategory.includes('Dispensasi') ? "Tuliskan detail alasan..." : "Tuliskan keterangan keperluan..."}
               />
           )}
         </div>
