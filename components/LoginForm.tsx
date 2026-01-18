@@ -63,7 +63,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ users, onLogin, dbError })
           <h1 className="text-2xl font-black text-slate-800 tracking-tighter mb-1">
             SIAP <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-indigo-600">Lapor</span>
           </h1>
-          <p className="text-slate-500 text-xs font-semibold tracking-wide">Sistem Ijin Agenda Pegawai</p>
+          <p className="text-slate-500 text-xs font-semibold tracking-wide Capitalize Eact Word">Sistem Ijin Agenda Pegawai</p>
+          <p className="text-brand-600 text-[10px] font-bold tracking-wider uppercase mt-1">UPT SD Negeri Remen 2</p>
         </div>
 
         {dbError && (
@@ -123,14 +124,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({ users, onLogin, dbError })
           <button
             type="submit"
             disabled={!!dbError}
-            className={`w-full text-white font-bold py-3.5 rounded-xl transition-all duration-300 shadow-lg hover:shadow-brand-500/40 flex items-center justify-center gap-2 text-sm transform active:scale-[0.97] mt-4 tracking-wide
+            className={`w-full text-white font-bold py-3.5 rounded-xl transition-all duration-300 shadow-lg hover:shadow-brand-500/40 flex items-center justify-center gap-2 text-sm transform active:scale-[0.97] mt-4 tracking-wide border border-white/20
               ${dbError 
                 ? 'bg-slate-400 cursor-not-allowed shadow-none' 
-                : 'bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500'
+                : 'bg-gradient-to-r from-brand-700 via-brand-600 to-brand-400 hover:from-brand-600 hover:to-brand-300'
               }`}
           >
-            <LogIn size={18} />
-            {dbError ? 'Sistem Offline' : 'Masuk Aplikasi'}
+            <LogIn size={20} />
+            {dbError ? 'Sistem Offline' : 'Login'}
           </button>
         </form>
 

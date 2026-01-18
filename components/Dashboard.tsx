@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { 
   PieChart, 
   Pie, 
@@ -39,11 +39,20 @@ const StatCard = ({ icon: Icon, label, value, colorClass, bgClass }: any) => (
 export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onApprove, onReject, onDelete, onEdit, onSyncUsers, onOpenExternalForm, onOpenDatabase }) => {
   const [showAll, setShowAll] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentTime, setCurrentTime] = useState(new Date());
   
   const total = requests.length;
   const approved = requests.filter(r => r.status === Status.APPROVED).length;
   const pending = requests.filter(r => r.status === Status.PENDING).length;
   const rejected = requests.filter(r => r.status === Status.REJECTED).length;
+
+  // Real-time clock effect
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const typeData = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -129,8 +138,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
               <FileSpreadsheet size={14} /><span>Review Data</span>
             </button>
           )}
-          <div className="flex items-center gap-1.5 text-[10px] md:text-xs text-slate-500 bg-white px-3 py-1.5 rounded-lg border border-slate-100 shadow-sm whitespace-nowrap font-medium">
-            <Calendar size={14} className="text-slate-300" /><span>{new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
+          <div className="flex flex-col items-end gap-1">
+             <div className="flex items-center gap-1.5 text-[10px] md:text-xs text-slate-500 bg-white px-3 py-1.5 rounded-lg border border-slate-100 shadow-sm whitespace-nowrap font-medium">
+               <Calendar size={14} className="text-slate-300" />
+               <span>{currentTime.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
+             </div>
+             <div className="flex items-center gap-1 text-[10px] md:text-xs font-mono font-bold text-slate-400 pr-1">
+                <Clock size={12} className="text-slate-300" />
+                <span>{currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} WIB</span>
+             </div>
           </div>
         </div>
       </header>
@@ -202,6 +218,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
                           </div>
                           <div className="flex items-center gap-1 text-[10px] text-slate-500">
                                 <Calendar size={10} /><span className="font-medium">{formatDate(req.startDate)}</span>
+                          </div>
+                          <div className="flex items-center gap-1 text-[10px] text-slate-500 font-mono">
+                                <Clock size={10} /><span className="font-medium">{req.startTime} - {req.endTime}</span>
                           </div>
                           <p className="text-xs text-slate-600 leading-snug italic line-clamp-2">"{req.reason}"</p>
                         </div>
