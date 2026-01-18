@@ -81,7 +81,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ users, onLogin, dbError })
             <h1 className="text-3xl font-black text-slate-800 tracking-tight mb-2">
               SIAP <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-sky-500">Lapor</span>
             </h1>
-            <p className="text-slate-500 text-s font-bold uppercase tracking-widest mb-1">Sistem Ijin Agenda Pegawai</p>
+            <p className="text-slate-500 text-[12px] font-bold uppercase tracking-widest mb-1">Sistem Ijin Agenda Pegawai</p>
              <div className="inline-block px-3 py-1 rounded-full bg-blue-50 border border-blue-100 mt-2">
                 <p className="text-blue-600 text-[11px] font-extrabold tracking-wider uppercase">UPT SD Negeri Remen 2</p>
              </div>

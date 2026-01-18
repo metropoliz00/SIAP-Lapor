@@ -141,13 +141,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
             </button>
           )}
           <div className="flex flex-col items-end gap-1.5">
-             <div className="flex items-center gap-2 text-xs text-slate-600 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm whitespace-nowrap font-semibold">
-               <Calendar size={14} className="text-brand-500" />
-               <span>{currentTime.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
-             </div>
              <div className="flex items-center gap-2 text-xs font-mono font-bold text-slate-500 pr-2">
                 <Clock size={14} className="text-brand-500" />
                 <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-700">{currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} WIB</span>
+             </div>
+             <div className="flex items-center gap-2 text-xs text-slate-600 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm whitespace-nowrap font-semibold">
+               <Calendar size={14} className="text-brand-500" />
+               <span>{currentTime.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
              </div>
           </div>
         </div>
@@ -292,15 +292,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
                <TrendingUp size={16} />
             </div>
           </div>
-          <div className="h-64 w-full relative">
+          {/* INCREASED HEIGHT to h-80 to fit diagram + legend without cutting off */}
+          <div className="h-80 w-full relative">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie 
                   data={typeData} 
                   cx="50%" 
-                  cy="50%" 
-                  innerRadius={60} 
-                  outerRadius={85} 
+                  cy="50%" // Centered vertically
+                  innerRadius={50} // Optimized radius
+                  outerRadius={75} // Optimized radius
                   fill="#8884d8" 
                   paddingAngle={5} 
                   dataKey="value"
@@ -312,11 +313,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
                 <Tooltip contentStyle={{ borderRadius: '12px', fontSize: '12px', padding: '10px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontWeight: 'bold' }} />
                 <Legend 
                   verticalAlign="bottom" 
-                  height={60} 
+                  height={80} 
                   align="center"
                   iconType="circle"
                   iconSize={8}
-                  wrapperStyle={{fontSize: '11px', width: '100%', paddingTop: '15px', fontWeight: 600, color: '#64748b'}} 
+                  wrapperStyle={{fontSize: '11px', width: '100%', paddingTop: '5px', fontWeight: 600, color: '#64748b'}} 
                 />
               </PieChart>
             </ResponsiveContainer>
