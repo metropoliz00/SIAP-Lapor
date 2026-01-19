@@ -298,7 +298,8 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="h-full flex font-sans relative bg-[#f8fafc]">
+    // Update container to h-[100dvh] for better mobile support, and overflow-hidden to act as app frame
+    <div className="h-[100dvh] flex font-sans relative bg-[#f8fafc] overflow-hidden">
       {showToast.show && (
         <div className="fixed top-6 right-6 z-50 animate-fade-in-up">
           <div className={`px-5 py-4 rounded-2xl shadow-xl flex items-center gap-3 border backdrop-blur-md text-sm ${
