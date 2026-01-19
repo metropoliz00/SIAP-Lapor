@@ -41,6 +41,15 @@ const App: React.FC = () => {
 
   const prevRequestsRef = useRef<LeaveRequest[]>(requests);
 
+  // Efek untuk mengubah Judul Tab Browser sesuai User Login
+  useEffect(() => {
+    if (currentUser) {
+      document.title = `SIAP | ${currentUser.name}`;
+    } else {
+      document.title = 'SIAP | Sistem Ijin Agenda Pegawai';
+    }
+  }, [currentUser]);
+
   const loadData = async () => {
     setIsLoadingData(true);
     setDbError('');
