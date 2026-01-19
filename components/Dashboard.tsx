@@ -229,7 +229,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
                           <div className="flex items-center gap-2 text-[11px] text-slate-500 font-mono">
                                 <Clock size={12} className="text-orange-400" /><span className="font-medium bg-orange-50 px-1.5 rounded text-orange-700">{req.startTime} - {req.endTime}</span>
                           </div>
-                          <p className="text-xs text-slate-500 line-clamp-2 mt-1 italic">"{req.reason}"</p>
+                          <p className="text-xs text-slate-500 mt-1 italic whitespace-pre-wrap break-words">"{req.reason}"</p>
                         </div>
                       </td>
                       <td className="px-5 py-4 align-top text-center">
