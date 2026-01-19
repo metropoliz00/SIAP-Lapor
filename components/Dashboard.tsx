@@ -82,8 +82,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
     return data;
   }, [requests, searchTerm, showAll]);
 
-  const handleDeleteClick = (id: string, name: string) => {
-    if (onDelete && window.confirm(`Hapus data ijin "${name}"?`)) onDelete(id);
+  const handleDeleteClick = (e: React.MouseEvent, id: string, name: string) => {
+    e.stopPropagation(); // Mencegah event bubbling
+    
+    if (onDelete) {
+        // Pesan konfirmasi yang tegas
+        const confirmMsg = `⚠️ KONFIRMASI HAPUS\n\nApakah Anda yakin ingin menghapus data pengajuan:\n"${name}"?\n\nData akan dihapus PERMANEN dari database dan tidak bisa dikembalikan.`;
+        if (window.confirm(confirmMsg)) {
+            onDelete(id);
+        }
+    }
   };
 
   const handleOpenForm = (req: LeaveRequest) => {
@@ -283,9 +291,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
                                 <button onClick={() => onEdit(req)} className="p-1.5 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition-colors" title="Edit"><Edit size={14} /></button>
                              )}
                              
-                             {/* Delete Button (KS Only) */}
-                             {onDelete && userRole === 'KEPALA_SEKOLAH' && (
-                                <button onClick={() => handleDeleteClick(req.id, req.name)} className="p-1.5 bg-slate-100 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus"><Trash2 size={14} /></button>
+                             {/* Delete Button (KS: All, GURU: Pending Only) */}
+                             {onDelete && (userRole === 'KEPALA_SEKOLAH' || (userRole === 'GURU' && req.status === Status.PENDING)) && (
+                                <button 
+                                  onClick={(e) => handleDeleteClick(e, req.id, req.name)} 
+                                  className="p-1.5 bg-slate-100 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" 
+                                  title={userRole === 'KEPALA_SEKOLAH' ? "Hapus Permanen" : "Batalkan Pengajuan"}
+                                >
+                                  <Trash2 size={14} />
+                                </button>
                              )}
                            </div>
                         </div>

@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { User, UserRole } from '../types';
-import { Edit, Save, X, Search, Plus, UploadCloud, Key, Check } from 'lucide-react';
+import { Edit, Save, X, Search, Plus, UploadCloud, Key, Check, Trash2 } from 'lucide-react';
 
 interface UserManagementProps {
   users: User[];
   onUpdateUser: (originalNip: string, updatedUser: User) => void;
   onAddUser: (newUser: User) => void;
+  onDeleteUser: (nip: string) => void;
   onSyncUsers: () => void;
   forceOpenAddModal?: boolean; // New prop
   onModalClosed?: () => void; // New prop
 }
 
-export const UserManagement: React.FC<UserManagementProps> = ({ users, onUpdateUser, onAddUser, onSyncUsers, forceOpenAddModal, onModalClosed }) => {
+export const UserManagement: React.FC<UserManagementProps> = ({ users, onUpdateUser, onAddUser, onDeleteUser, onSyncUsers, forceOpenAddModal, onModalClosed }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isAddingUser, setIsAddingUser] = useState(false);
@@ -53,6 +54,13 @@ export const UserManagement: React.FC<UserManagementProps> = ({ users, onUpdateU
       password: ''
     });
     setIsAddingUser(true);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent, user: User) => {
+    e.stopPropagation();
+    if (window.confirm(`⚠️ KONFIRMASI HAPUS\n\nApakah Anda yakin ingin menghapus pegawai:\n"${user.name}" (${user.nip})?\n\nData akan dihapus dari server.`)) {
+      onDeleteUser(user.nip);
+    }
   };
 
   const closeModals = () => {
@@ -237,6 +245,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ users, onUpdateU
                            <div className="flex items-center justify-center gap-1">
                               <button onClick={() => handleInlineEditClick(user)} className="p-1 text-blue-500 hover:bg-blue-50 rounded" title="Edit"><Edit size={14} /></button>
                               <button onClick={() => handleModalEditClick(user)} className="p-1 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded" title="Password"><Key size={14} /></button>
+                              <button onClick={(e) => handleDeleteClick(e, user)} className="p-1 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded transition-colors" title="Hapus"><Trash2 size={14} /></button>
                            </div>
                          )}
                       </td>

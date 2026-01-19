@@ -112,6 +112,19 @@ const App: React.FC = () => {
     }
   };
 
+  const handleDeleteUser = async (nip: string) => {
+    const newUsers = users.filter(u => u.nip !== nip);
+    setUsers(newUsers);
+    setShowToast({ show: true, message: 'Menghapus data di server...', type: 'info' });
+
+    const success = await syncUsersToSpreadsheet(newUsers);
+    if (success) {
+      setShowToast({ show: true, message: 'Pegawai berhasil dihapus!', type: 'success' });
+    } else {
+      setShowToast({ show: true, message: 'Gagal hapus di server.', type: 'error' });
+    }
+  };
+
   const handleSyncUsers = async () => {
     const success = await syncUsersToSpreadsheet(users);
     if (success) setShowToast({ show: true, message: 'Sync berhasil!', type: 'success' });
@@ -160,10 +173,21 @@ const App: React.FC = () => {
   };
 
   const handleDeleteRequest = async (id: string) => {
+    // 1. Optimistic Update (Hapus di UI dulu agar cepat)
+    const previousRequests = [...requests];
     setRequests(requests.filter(req => req.id !== id));
+    setShowToast({ show: true, message: 'Memproses penghapusan...', type: 'info' });
+
+    // 2. Request Hapus ke Server
     const success = await deleteLeaveRequest(id);
-    if (success) setShowToast({ show: true, message: 'Data dihapus.', type: 'success' });
-    else setShowToast({ show: true, message: 'Gagal hapus di server.', type: 'info' });
+    
+    if (success) {
+      setShowToast({ show: true, message: 'Data berhasil dihapus dari database.', type: 'success' });
+    } else {
+      // 3. Kembalikan data jika server gagal
+      setRequests(previousRequests);
+      setShowToast({ show: true, message: 'Gagal menghapus data di server.', type: 'error' });
+    }
   };
 
   const handleGeneratePdf = async (req: LeaveRequest) => {
@@ -379,6 +403,7 @@ const App: React.FC = () => {
                   users={users} 
                   onUpdateUser={handleUpdateUserDatabase} 
                   onAddUser={handleAddUser} 
+                  onDeleteUser={handleDeleteUser}
                   onSyncUsers={handleSyncUsers} 
                 />
               ) : view === 'PROFILE' ? (
