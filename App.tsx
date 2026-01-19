@@ -160,14 +160,16 @@ const App: React.FC = () => {
 
   const handleApprove = async (id: string) => {
     setRequests(requests.map(req => req.id === id ? { ...req, status: Status.APPROVED } : req));
-    const success = await updateSheetStatus(id, 'APPROVED');
+    // CHANGE: Menggunakan Status.APPROVED agar nilai yang dikirim adalah 'Disetujui' (bukan string 'APPROVED')
+    const success = await updateSheetStatus(id, Status.APPROVED);
     if (success) setShowToast({ show: true, message: 'Disetujui.', type: 'success' });
     else setShowToast({ show: true, message: 'Gagal update server.', type: 'error' });
   };
 
   const handleReject = async (id: string) => {
     setRequests(requests.map(req => req.id === id ? { ...req, status: Status.REJECTED } : req));
-    const success = await updateSheetStatus(id, 'REJECTED');
+    // CHANGE: Menggunakan Status.REJECTED agar nilai yang dikirim adalah 'Ditolak'
+    const success = await updateSheetStatus(id, Status.REJECTED);
     if (success) setShowToast({ show: true, message: 'Ditolak.', type: 'success' });
     else setShowToast({ show: true, message: 'Gagal update server.', type: 'error' });
   };
