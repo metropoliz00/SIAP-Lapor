@@ -40,6 +40,7 @@ const MOCK_REQUESTS: LeaveRequest[] = [
 ];
 
 const postToSheet = async (payload: any) => {
+  // Jika URL kosong, gunakan Mock Data (Mode Demo)
   if (!GOOGLE_SCRIPT_URL) {
     console.log(`[Demo Mode] URL belum diset. Action: ${payload.action}`);
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -55,9 +56,20 @@ const postToSheet = async (payload: any) => {
     });
 
     if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-    return await response.json();
+    const result = await response.json();
+    return result;
   } catch (error) {
-    console.warn(`[Connection Failed] ${payload.action}. Using mock data.`);
+    console.warn(`[Connection Failed] ${payload.action}. Error:`, error);
+    
+    // CRITICAL FIX: Jika gagal koneksi untuk aksi HAPUS/UPDATE/CREATE, jangan return Mock Success!
+    // Return Error agar UI tahu bahwa operasi gagal.
+    if (payload.action === 'delete' || payload.action === 'create' || payload.action === 'update_data' || payload.action === 'update_status') {
+      console.error("Gagal melakukan perubahan data ke Database.");
+      return { status: 'error', message: 'Gagal terhubung ke database. Cek koneksi internet.' };
+    }
+
+    // Hanya gunakan Mock Data saat gagal koneksi untuk READ data (get_users, get_requests)
+    // agar aplikasi tetap bisa terbuka meski offline.
     await new Promise(resolve => setTimeout(resolve, 800));
     return getMockResponse(payload);
   }
@@ -67,6 +79,8 @@ const getMockResponse = (payload: any) => {
     if (payload.action === 'get_users') return { status: 'success', data: MOCK_USERS };
     if (payload.action === 'get_requests') return { status: 'success', data: MOCK_REQUESTS };
     if (payload.action === 'generate_pdf_drive') return { status: 'success', url: 'https://google.com', filename: 'Mock_Surat.pdf' };
+    
+    // Default success message for demo
     return { status: 'success', message: 'Demo Success' };
 };
 
@@ -114,7 +128,9 @@ export const updateSheetStatus = async (id: string, status: string) => {
 };
 
 export const deleteLeaveRequest = async (id: string) => {
-  return (await postToSheet({ action: 'delete', id })).status === 'success';
+  const result = await postToSheet({ action: 'delete', id });
+  console.log("Delete status:", result);
+  return result.status === 'success';
 };
 
 export const syncUsersToSpreadsheet = async (users: User[]) => {
