@@ -44,8 +44,26 @@ export const LeaveForm: React.FC<LeaveFormProps> = ({ currentUser, onSubmit, onC
       
       setStartDate(initialData.startDate.split('T')[0]); // Ensure date format
       setEndDate(initialData.endDate.split('T')[0]);
-      setStartTime(initialData.startTime);
-      setEndTime(initialData.endTime);
+
+      // Parse Time correctly (handle ISO strings from Sheet)
+      const parseTime = (val: string) => {
+         if (!val) return '00:00';
+         // Handle ISO string
+         if (val.includes('T') || (val.includes('-') && val.includes(':'))) {
+             try {
+                const d = new Date(val);
+                if (!isNaN(d.getTime())) {
+                   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                }
+             } catch(e) {}
+         }
+         // Handle HH:mm:ss or HH:mm
+         if (val.includes(':')) return val.substring(0, 5);
+         return val;
+      };
+
+      setStartTime(parseTime(initialData.startTime));
+      setEndTime(parseTime(initialData.endTime));
       
       // Parse Type
       const type = initialData.type;

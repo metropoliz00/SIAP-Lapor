@@ -127,6 +127,26 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
     }
   };
 
+  const formatTime = (timeString: string) => {
+    if (!timeString) return '-';
+    // Case: ISO String / Date format
+    if (timeString.includes('T') || timeString.includes('Z')) {
+      try {
+        const date = new Date(timeString);
+        if (!isNaN(date.getTime())) {
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+      } catch (e) { return timeString; }
+    }
+    // Case: HH:mm:ss
+    if (timeString.includes(':')) {
+       return timeString.substring(0, 5);
+    }
+    return timeString;
+  };
+
   return (
     <div className="space-y-6">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 animate-fade-in">
@@ -227,7 +247,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
                                 <Calendar size={12} className="text-brand-400" /><span className="font-semibold">{formatDate(req.startDate)}</span>
                           </div>
                           <div className="flex items-center gap-2 text-[11px] text-slate-500 font-mono">
-                                <Clock size={12} className="text-orange-400" /><span className="font-medium bg-orange-50 px-1.5 rounded text-orange-700">{req.startTime} - {req.endTime}</span>
+                                <Clock size={12} className="text-orange-400" /><span className="font-medium bg-orange-50 px-1.5 rounded text-orange-700">{formatTime(req.startTime)} - {formatTime(req.endTime)}</span>
                           </div>
                           <p className="text-xs text-slate-500 mt-1 italic whitespace-pre-wrap break-words">"{req.reason}"</p>
                         </div>
