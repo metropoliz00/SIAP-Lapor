@@ -180,7 +180,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ users, onLogin, dbError })
              <div className="flex items-center justify-center gap-2 text-xs text-slate-400 font-medium">
                <span>&copy; 2026</span>
                <div className="w-1 h-1 bg-slate-300 rounded-full"></div>
-               <span>Dev. Dedy Meyga Saputra, S.Pd, M.Pd</span>
+               <span>UPT SD Negeri Remen 2</span>
              </div>
           </div>
         </div>
