@@ -296,6 +296,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ requests, userRole, onAppr
               </tbody>
             </table>
           </div>
+
+          {/* View More Footer */}
+          {!searchTerm && requests.length > 3 && (
+            <div className="border-t border-slate-100 p-3 bg-slate-50/30 flex justify-center">
+               <button 
+                  onClick={() => setShowAll(!showAll)}
+                  className="text-xs font-bold text-brand-600 hover:text-brand-700 hover:bg-brand-50 px-4 py-2 rounded-full transition-all flex items-center gap-2 group"
+               >
+                  {showAll ? (
+                    <>Tutup Daftar <ChevronUp size={14} className="group-hover:-translate-y-0.5 transition-transform" /></>
+                  ) : (
+                    <>Lihat Semua ({requests.length - 3} lainnya) <ChevronDown size={14} className="group-hover:translate-y-0.5 transition-transform" /></>
+                  )}
+               </button>
+            </div>
+          )}
         </div>
 
         {/* Charts Section */}
